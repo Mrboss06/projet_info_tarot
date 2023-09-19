@@ -11,6 +11,7 @@ def recuperer_les_resultats_de_la_donne(index_du_preneur, index_annonce, nb_bout
 
 
 
-def calculer_les_scores(indice_partie, scores):
+def calculer_les_scores(indice_partie, scores, index_annonce):
     scoring=score[indice_partie].split()
-    
+    score_du_preneur=SCORES_BOUTS[index_annonce]
+
