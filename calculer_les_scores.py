@@ -7,7 +7,7 @@ score = []
 
 SCORES_BOUTS=[56,51,41,36]
 MULTIPLICATEURS=[1,2,4,6]
-ANNONCES_ANNEXES=[20,30,40,10]
+ANNONCES_ANNEXES=[10,10]
 
 index_du_preneur=input()
 index_annonce=input()
@@ -31,8 +31,25 @@ def calculer_les_scores(indice_partie, nb_bouts, index_annonce):
     score[index_du_preneur]+=score_preneur-score_adversaires
     score[0],score[1],score[2],score[3]+=score_adversaires,score_adversaires,score_adversaires,score_adversaires
 
-def ajouter_annonces_annexes(annonces_annexes, joueur_annonces_annexes, vainqueur_dernière_levée,score_du_preneur):
-    if annonces_annexes==1:
+def ajouter_annonces_annexes(annonces_annexes, index_suite, joueur_annonces_annexes, vainqueur_derniere_levee,score_du_preneur,index_annonce):
+    if annonces_annexes[0]==1:
+        if score_du_preneur>=0:
+            score[index_du_preneur]+=10*(index_suite+1)*4
+            score[0],score[1],score[2],score[3]-=10*(index_suite+1)
+        else:
+            score[index_du_preneur]-=10*(index_suite+1)*4
+            score[0],score[1],score[2],score[3]+=10*(index_suite+1)  
+        annonces_annexes.pop(0)    
+    elif annonces_annexes[0]==2:
+       if vainqueur_derniere_levee==index_du_preneur:
+          score[index_du_preneur]+=10*(index_annonce+1)*4
+          score[0],score[1],score[2],score[3]-=10*(index_annonce+1)    
+       else:
+          score[index_du_preneur]-=10*(index_annonce+1)*4
+          score[0],score[1],score[2],score[3]+=10*(index_annonce+1)    
+            
+
+
         
 
     
