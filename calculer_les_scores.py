@@ -7,7 +7,6 @@ scores = []
 
 SCORES_BOUTS=[56,51,41,36]
 MULTIPLICATEURS=[1,2,4,6]
-ANNONCES_ANNEXES=[10,10]
 SCORES_SUITES=[20,30,40]
 
 index_du_preneur=input()
@@ -51,8 +50,6 @@ def ajouter_annonces_annexes(annonces_annexes, index_suite, vainqueur_derniere_l
                  score[index_du_preneur]-=10*(index_prise+1)*4
                  score[0],score[1],score[2],score[3]+=10*(index_prise+1) 
                 annonces_annexes.pop(0)     
-
-        
 
     
 
