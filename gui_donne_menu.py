@@ -14,4 +14,4 @@ class FrameDonne(ctk.CTkFrame):
         self.donnes = []
         
         self.donnes.append(gnd.FrameNouvelleDonne(self.donneHolder))
-        self.donnes[-1].pack(expand=True)
+        self.donnes[-1].pack(expand=True, side='left')
