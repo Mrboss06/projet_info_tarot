@@ -1,1 +1,0 @@
-trèfle= [ ('trèfle', 1), ('trèfle', 2), ('trèfle', 3), ('trèfle', 4), ('trèfle', 5), ('trèfle', 6), ('trèfle', 7), ('trèfle', 8), ('trèfle', 9), ('trèfle', 10), ('trèfle', 11), ('trèfle', 12), ('trèfle', 13), ('trèfle', 14)]
