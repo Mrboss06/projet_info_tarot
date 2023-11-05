@@ -3,10 +3,11 @@ import threading
 import pickle
 
 import game
+import tarot_class
 
 HEADER = 64
 PORT = 5050
-SERVER = '172.21.6.50'
+SERVER = '192.168.0.44'
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
@@ -18,15 +19,17 @@ server.bind(ADDR)
 messages = []
 connections = []
 
+lobbies = []
 
-game_is_ready = False
 
-
-def handle_client(conn: socket.socket, addr):
-    print(f"[NEW CONNECTION] {addr} connected")
+def handle_client(conn: socket.socket, addr, username):
+    print(f"[NEW CONNECTION] {username} connected")
     
-    username = pickle.loads(conn.recv(2048))
-    connections[connections.index([conn, addr])].append(username)
+    dans_un_lobby = False
+    
+    lst_lobbies = get_liste_lobby()
+    msg_send = pickle.dumps(('SERVER', 'action', 'choisir_lobby', lst_lobbies))
+    conn.send(msg_send)
     
     connected = True
     while connected:
@@ -37,60 +40,56 @@ def handle_client(conn: socket.socket, addr):
             print(f"[{username}] disconnected")
             conn.send(pickle.dumps(DISCONNECT_MESSAGE))
             messages.append(('[DECONNECTION]', username))
-        
         else:
-            print(f"{username}: {msg}")
-            messages.append((msg, username))
+            if msg[0] == 'SERVER':
+                if msg[1] == "action":
+                    if msg[2] == "choisir_lobby":
+                        if msg[3] == len(lobbies):
+                            nouveau_lobby()
+                        lobbies[msg[3]][0].nouveaux_joueurs.append((conn, addr, username))
+            
     
     connections.remove([conn, addr, username])
     conn.close()
 
 
+def get_liste_lobby():
+    """
+    Renvoie la liste de tous les lobbies sous la forme d'une liste
+    [
+        'Lobby 0(3): joueur 1/joueur 2/joueur 3/'
+        'Lobby 1(1): joueur 1/'
+        'Lobby 2(0):'
+    ]
+    
+    """
+    lst_lobbies = []
+    for lob in lobbies:
+        current_lobby = ""
+        current_lobby += f"Lobby {lob[0].numero_lobby}({len(lob[0].joueurs)}): "
+        for joueur in lob[0].joueurs:
+            current_lobby += joueur[2]+'/'
+        lst_lobbies.append(current_lobby)
+    return lst_lobbies
+    
 
-def handle_messages():
-    while True:
-        new_messages = messages.copy()
-        if new_messages != []:
-            for message in new_messages:
-                for conn in connections:
-                    if message[1] != conn[-1]:
-                        conn[0].send(pickle.dumps(f"{message[1]}: {message[0]}"))
-                messages.remove(message)
 
-
-message_thread = threading.Thread(target=handle_messages)
-
-
-
-def handle_game():
-    while len(connections) != 4: pass
-    messages.append(('All players are connected, waiting for them to be ready', '[SERVER]'))
-    players_are_ready = False
-    while not players_are_ready:
-        players_are_ready = True
-        for conn in connections:
-            if len(conn) == 2:
-                players_are_ready = False
-    messages.append(('All players are ready, starting the game', '[SERVER]'))
-    game.distribuer()
-    for i in range(4):
-        data = pickle.dumps(('main', game.joueurs[i].main))
-        connections[i][0].send(data)
-    messages.append(('Les mains sont distribuées', '[SERVER]'))
-
-game_thread = threading.Thread(target=handle_game)
-
+def nouveau_lobby():
+    partie_tarot = tarot_class.PartieTarot(len(lobbies)+1)
+    partie_tarot_thread = threading.Thread(target=partie_tarot.run)
+    lobbies.append((partie_tarot, partie_tarot_thread))
+    partie_tarot_thread.start()
 
 
 def start():
     server.listen()
     print(f"[LISTENING] server is listening on {ADDR}")
-    message_thread.start()
-    game_thread.start()
+    nouveau_lobby()
     while True:
         conn, addr = server.accept()
-        connections.append([conn, addr])
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
+        username = pickle.loads(conn.recv(2048))
+        connections.append((conn, addr, username))
+        thread = threading.Thread(target=handle_client, args=(conn, addr, username))
         thread.start()
         print(f"[ACTIVE CONNECTIONS] {len(connections)}")
 

@@ -8,12 +8,12 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '172.21.6.50'
+SERVER = '192.168.0.44'
 ADDR = (SERVER, PORT)
 
 
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
 
 main = joueur.Joueur()
 
@@ -29,28 +29,29 @@ def handle_server():
             print('[CLIENT] disconnecting...')
             break
         elif type(msg) != str:
-            if msg[0] == 'main':
-                main.main = msg[1]
-                print('ta main est: ', main.main)
+            if msg[0] == 'SERVER':
+                if msg[1] == 'message':
+                    print(msg[2])
+                elif msg[1] == 'action':
+                    threading.Thread(target=eval(msg[2]), args=msg[3:]).start()
+            if msg[0] == 'LOBBY':
+                print(f"[LOBBY{msg[1]}] {msg[2]}")
         else:
             print(msg)
 
 
-def loop():
-    username = input('your username: ')
-    send(username)
-    while True:
-        message = input()
-        if message == 'disconnect':
-            send(DISCONNECT_MESSAGE)
-            break
-        else:
-            send(message)
+def choisir_lobby(lst_lobbies):
+    for lobby in lst_lobbies:
+        print(lobby)
+    print(f"({len(lst_lobbies)}) pour un nouveau lobby")
+    lobby = input('Quel lobby ? ')
+    client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", int(lobby))))
 
+username = input('Username: ')
+client.connect(ADDR)
+send(username)
 
-loop_thread = threading.Thread(target=loop)
 server_thread = threading.Thread(target=handle_server)
 
-loop_thread.start()
 server_thread.start()
 
