@@ -46,16 +46,16 @@ def handle_client(conn: socket.socket, addr, username):
                     if msg[2] == "choisir_lobby":
                         if msg[3] == len(lobbies):
                             nouveau_lobby()
-                        lobbies[msg[3]][0].nouveaux_joueurs.append((conn, addr, username))
+                        lobbies[obtenir_lobby_par_numero(msg[3])][0].nouveaux_joueurs.append((conn, addr, username))
             
     
     connections.remove([conn, addr, username])
     conn.close()
 
-
 def get_liste_lobby():
     """
     Renvoie la liste de tous les lobbies sous la forme d'une liste
+    Par exemple:
     [
         'Lobby 0(3): joueur 1/joueur 2/joueur 3/'
         'Lobby 1(1): joueur 1/'
@@ -71,15 +71,25 @@ def get_liste_lobby():
             current_lobby += joueur[2]+'/'
         lst_lobbies.append(current_lobby)
     return lst_lobbies
-    
-
 
 def nouveau_lobby():
+    """
+    Crée un nouveau lobby, soit une nouvelle instance de la classe PartieTarot dans un nouveau Thread
+    Le nouveau thread et la nouvelle instance sont ajoutés à la liste 'lobbies'
+    """
     partie_tarot = tarot_class.PartieTarot(len(lobbies)+1)
     partie_tarot_thread = threading.Thread(target=partie_tarot.run)
     lobbies.append((partie_tarot, partie_tarot_thread))
     partie_tarot_thread.start()
 
+def obtenir_lobby_par_numero(numero):
+    """
+    Renvoie un tuple (PartieTarot, thread_de_PartieTarot) de 'lobbies'
+    Le PartieTarot de ce tuple a comme 'numero_lobby' l'argument donné à la fonction
+    """
+    for lobby in range(len(lobbies)):
+        if lobbies[lobby][0].numero_lobby == numero:
+            return lobby
 
 def start():
     server.listen()
