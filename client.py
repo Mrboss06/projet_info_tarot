@@ -43,11 +43,24 @@ def handle_server():
 def choisir_lobby(lst_lobbies):
     for lobby in lst_lobbies:
         print(lobby)
-    print(f"({len(lst_lobbies)}) pour un nouveau lobby")
+    print(f"({len(lst_lobbies)+1}) pour un nouveau lobby")
     lobby = input('Quel lobby ? ')
+    while int(lobby)<1 or int(lobby)>len(lst_lobbies)+1:
+        lobby = input("Vous avez rentré un mauvais lobby\nQuel lobby choisissez vous ?")
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", int(lobby))))
 
-username = input('Username: ')
+def username_est_valide(username):
+    for charactere in username:
+        if not (charactere.isalnum() or charactere in '-_'):
+            return False
+    return True
+
+username = input('Pseudonyme: ')
+
+while not username_est_valide(username):
+    username = input("\nLe pseudonyme donné n'est pas valide\n\nPseudonyme: ")
+
+
 client.connect(ADDR)
 send(username)
 
