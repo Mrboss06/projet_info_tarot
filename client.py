@@ -41,13 +41,18 @@ def handle_server():
 
 
 def choisir_lobby(lst_lobbies):
+    possible_lobbies = []
     for lobby in lst_lobbies:
-        print(lobby)
-    print(f"({len(lst_lobbies)+1}) pour un nouveau lobby")
+        if lobby[0].count('/')<4:
+            print(lobby[0])
+            possible_lobbies.append(str(lobby[1]))
+    print(f"taper + pour un nouveau lobby")
     lobby = input('Quel lobby ? ')
-    while int(lobby)<1 or int(lobby)>len(lst_lobbies)+1:
-        lobby = input("Vous avez rentré un mauvais lobby\nQuel lobby choisissez vous ?")
-    client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", int(lobby))))
+    while lobby != '+' and not lobby in possible_lobbies:
+        lobby = input("Vous avez rentré un mauvais lobby\nQuel lobby choisissez vous ? ")
+    if lobby != '+':
+        lobby = int(lobby)
+    client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
 
 def username_est_valide(username):
     for charactere in username:
