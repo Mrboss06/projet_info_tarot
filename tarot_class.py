@@ -1,6 +1,7 @@
 import socket
 import threading
 import pickle
+import time
 
 import joueur
 
@@ -13,7 +14,6 @@ class PartieTarot:
         self.nouveaux_joueurs = []
         self.numero_lobby = numero_lobby
         self.a_commence = False
-    
     
     def run(self):
         while len(self.joueurs) != 4:
