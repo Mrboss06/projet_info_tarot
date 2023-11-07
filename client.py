@@ -8,14 +8,14 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '192.168.0.44'
+SERVER = '172.21.6.51'
 ADDR = (SERVER, PORT)
 
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-main = joueur.Joueur()
+main_joueur = joueur.Joueur()
 
 def send(msg):
     message = pickle.dumps(msg)
@@ -35,7 +35,10 @@ def handle_server():
                 elif msg[1] == 'action':
                     threading.Thread(target=eval(msg[2]), args=msg[3:]).start()
             if msg[0] == 'LOBBY':
-                print(f"[LOBBY{msg[1]}] {msg[2]}")
+                if msg[1] == "action":
+                    threading.Thread(target=eval(msg[2]), args=msg[3:]).start()
+                elif msg[1] == "message":
+                    print(f"[LOBBY] {msg[2]}")
         else:
             print(msg)
 
@@ -53,6 +56,10 @@ def choisir_lobby(lst_lobbies):
     if lobby != '+':
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
+
+def recevoir_jeu(main):
+    main_joueur.main=main
+    print(f"J'ai reçu un jeu: {main}")
 
 def username_est_valide(username):
     for charactere in username:
