@@ -16,6 +16,7 @@ class PartieTarot:
         self.nouveaux_joueurs = []
         self.numero_lobby = numero_lobby
         self.a_commence = False
+        self.prises = []
     
     def run(self):
         while len(self.joueurs) != 4:
@@ -32,7 +33,7 @@ class PartieTarot:
     
     def send_msg_to_all(self, msg):
         for connection in self.joueurs:
-            msg_send = pickle.dumps(('LOBBY', msg))
+            msg_send = pickle.dumps(('LOBBY', "message", msg))
             connection[0].send(msg_send)
     
     def send_msg(self, conn, type, *msg):
