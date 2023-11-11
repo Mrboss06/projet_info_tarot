@@ -72,9 +72,9 @@ def choisir_prise(prises):
     for i in range(plus_petite_annonce_possible-1, 5-plus_petite_annonce_possible):
         print(f"{i+2} {possibilites[i]}")
     prise = int(input())
-    if prise != 0:
+    if prise != 1:
         prise += plus_petite_annonce_possible - 2
-    send(('LOBBY', 'action', 'recevoir_prise'))
+    send(('LOBBY', 'action', 'recevoir_prise', prise))
 
 def username_est_valide(username):
     for charactere in username:
