@@ -74,7 +74,7 @@ def get_liste_lobby():
     lst_lobbies = []
     for lob in lobbies:
         current_lobby = ""
-        current_lobby += f"Lobby {lob[0].numero_lobby}({len(lob[0].joueurs)} personne{'s' if len(lob[0].joueur)>1 else ''}): "
+        current_lobby += f"Lobby {lob[0].numero_lobby}({len(lob[0].joueurs)} personne{'s' if len(lob[0].joueurs)>1 else ''}): "
         for joueur in lob[0].joueurs:
             current_lobby += joueur[2]+'/'
         lst_lobbies.append((current_lobby, lob[0].numero_lobby))
