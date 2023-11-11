@@ -44,26 +44,33 @@ def handle_server():
 
 
 def choisir_lobby(lst_lobbies):
+    print("\nVoici les parties que tu peux rejoindre:\n")
     possible_lobbies = []
     for lobby in lst_lobbies:
         if lobby[0].count('/')<4:
             print(lobby[0])
             possible_lobbies.append(str(lobby[1]))
-    print(f"taper + pour un nouveau lobby")
-    lobby = input('Quel lobby ? ')
+    print(f"Tape + pour creer un nouveau lobby, sinon le numero du lobby que tu veux rejoindre")
+    lobby = input()
     while lobby != '+' and not lobby in possible_lobbies:
-        lobby = input("Vous avez rentré un mauvais lobby\nQuel lobby choisissez vous ? ")
+        print("\nTon choix n'est pas dans les possibilitees")
+        print(f"Tape + pour creer un nouveau lobby, sinon le numero du lobby que tu veux rejoindre")
+        lobby = input()
+    print("\n")
     if lobby != '+':
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
 
+
 def recevoir_jeu(main):
     main_joueur.main=main
-    print(f"J'ai reçu un jeu: {main}")
+    print(f"Voici ton jeu:\n{main}\n****\n")
+
 
 def verifier_reception_jeu():
     if main_joueur.main == []:
         send(("LOBBY", "action", "jeu_pas_recu"))
+
 
 def choisir_prise(prises):
     print("\n** C'est à vous d'annoncer **\nQue voulez vous faire ?\n\ntaper:\n1 pour passer")
@@ -84,7 +91,10 @@ def username_est_valide(username):
             return False
     return True
 
-username = input('Pseudonyme: ')
+
+print("Bienvenue au jeu de tarot!\n\n")
+print("Quel est votre pseudonyme ?")
+username = input()
 
 while not username_est_valide(username):
     username = input("\nLe pseudonyme donné n'est pas valide\n\nPseudonyme: ")
