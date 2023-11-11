@@ -70,7 +70,7 @@ def choisir_prise(prises):
     possibilites = ["pour une petite", "pour une garde", "pour une garde-sans", "pour une garde-contre"]
     plus_petite_annonce_possible = max(prises)+1 if prises != [] else 1
     for i in range(0, 5-plus_petite_annonce_possible):
-        print(f"{i+2} {possibilites[i]}")
+        print(f"{i+2} {possibilites[i+plus_petite_annonce_possible-1]}")
     prise = int(input())
     if prise != 1:
         prise += plus_petite_annonce_possible - 2
