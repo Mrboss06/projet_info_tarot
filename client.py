@@ -33,10 +33,10 @@ def handle_server():
                 if msg[1] == 'message':
                     print(msg[2])
                 elif msg[1] == 'action':
-                    threading.Thread(target=eval(msg[2]), args=msg[3:]).start()
+                    threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])).start()
             if msg[0] == 'LOBBY':
                 if msg[1] == "action":
-                    threading.Thread(target=eval(msg[2]), args=msg[3:]).start()
+                    threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])).start()
                 elif msg[1] == "message":
                     print(f"[LOBBY] {msg[2]}")
         else:
@@ -60,6 +60,10 @@ def choisir_lobby(lst_lobbies):
 def recevoir_jeu(main):
     main_joueur.main=main
     print(f"J'ai reçu un jeu: {main}")
+
+def verifier_reception_jeu():
+    if main_joueur.main == []:
+        send(("LOBBY", "action", "jeu_pas_recu"))
 
 def choisir_prise():
     print('taper:\n 1 pour passer\n2 pour faire une petite\n3 pour faire une garde\n4 pour faire une garde-sans\n5 pour faire une garde-contre')
