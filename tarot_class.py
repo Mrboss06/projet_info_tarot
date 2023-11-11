@@ -29,16 +29,19 @@ class PartieTarot:
         self.send_msg_to_all("message", 'Tous les joueurs sont connectes, la partie commence')
         self.a_commence = True
         self.distribuer()
+        self.faire_le_choix_des_prises()
         while 1: pass
     
     def send_msg_to_all(self, type, *msg):
         for connection in self.joueurs:
             msg_send = pickle.dumps(('LOBBY', type, *msg))
             connection[0].send(msg_send)
+        time.sleep(0.1)
     
     def send_msg(self, conn, type, *msg):
         msg_send = pickle.dumps(('LOBBY', type, *msg))
         conn.send(msg_send)
+        time.sleep(0.1)
         print("envoi d'un message")
 
     def distribuer(self):
@@ -58,18 +61,18 @@ class PartieTarot:
         for i in range(4):
             self.send_msg(self.joueurs[i][0], 'action', 'recevoir_jeu', self.joueurs[i][3].main)
         self.send_msg_to_all("action", "verifier_reception_jeu")
+
+    def faire_le_choix_des_prises(self):
         nb_prise_actuel = 0
         for i in range(4):
-            self.send_msg(self.joueurs[i][0], 'action', 'choisir_prise')
+            self.send_msg(self.joueurs[i][0], 'action', 'choisir_prise', self.prises)
             while len(self.prises) == nb_prise_actuel:
                 pass
             nb_prise_actuel = len(self.prises)
         self.send_msg_to_all("message", f'les prises sont {self.prises}')
-        while 1: pass
-            
     
     def recevoir_prise(self, username, prise):
-        self.send_msg_to_all(f"{username} {'fait une '+prise if prise != 'passe' else 'passe'}!")
+        self.send_msg_to_all("message", f"{username} {'fait une '+('petite', 'garde', 'garde-sans', 'garde-contre')[prise-1] if prise != 0 else 'passe'}!")
         self.prises.append(prise)
     
     def jeu_pas_recu(self, username):
