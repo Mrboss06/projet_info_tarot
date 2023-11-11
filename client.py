@@ -33,10 +33,10 @@ def handle_server():
                 if msg[1] == 'message':
                     print(msg[2])
                 elif msg[1] == 'action':
-                    threading.Thread(target=eval(msg[2]), args=msg[3:]).start()
+                    threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])).start()
             if msg[0] == 'LOBBY':
                 if msg[1] == "action":
-                    threading.Thread(target=eval(msg[2]), args=msg[3:]).start()
+                    threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])).start()
                 elif msg[1] == "message":
                     print(f"[LOBBY] {msg[2]}")
         else:
@@ -61,11 +61,18 @@ def recevoir_jeu(main):
     main_joueur.main=main
     print(f"J'ai reçu un jeu: {main}")
 
-def choisir_prise():
-    print('taper:\n 1 pour passer\n2 pour faire une petite\n3 pour faire une garde\n4 pour faire une garde-sans\n5 pour faire une garde-contre')
-    prise = input()
-    prise = ['passe', 'petite', 'garde', 'garde-sans', 'garde-contre'][int(prise)-1]
-    send(('LOBBY', 'action', 'recevoir_prise', prise))
+def verifier_reception_jeu():
+    if main_joueur.main == []:
+        send(("LOBBY", "action", "jeu_pas_recu"))
+
+def choisir_prise(prises):
+    print("\n** C'est à vous d'annoncer **\nQue voulez vous faire ?\n\ntaper:\n1 pour passer")
+    possibilites = ["pour une petite", "pour une garde", "pour une garde-sans", "pour une garde-contre"]
+    plus_petite_annonce_possible = max(prises)+1 if prises != [] else 1
+    for i in range(2, 7-plus_petite_annonce_possible):
+        print(f"{i} {possibilites[i-2]}")
+    prise = int(input())
+    send(('LOBBY', 'action', 'recevoir_prise', prise-2+plus_petite_annonce_possible))
 
 def username_est_valide(username):
     for charactere in username:
