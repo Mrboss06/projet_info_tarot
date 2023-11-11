@@ -68,11 +68,13 @@ def verifier_reception_jeu():
 def choisir_prise(prises):
     print("\n** C'est à vous d'annoncer **\nQue voulez vous faire ?\n\ntaper:\n1 pour passer")
     possibilites = ["pour une petite", "pour une garde", "pour une garde-sans", "pour une garde-contre"]
-    plus_petite_annonce_possible = max(prises)+1 if prises != [] else 0
-    for i in range(plus_petite_annonce_possible, 7-plus_petite_annonce_possible):
-        print(f"{i+2} {possibilites[2]}")
+    plus_petite_annonce_possible = max(prises)+1 if prises != [] else 1
+    for i in range(plus_petite_annonce_possible-1, 5-plus_petite_annonce_possible):
+        print(f"{i+2} {possibilites[i]}")
     prise = int(input())
-    send(('LOBBY', 'action', 'recevoir_prise', max(0, prise-plus_petite_annonce_possible)))
+    if prise != 0:
+        prise += plus_petite_annonce_possible - 2
+    send(('LOBBY', 'action', 'recevoir_prise'))
 
 def username_est_valide(username):
     for charactere in username:
