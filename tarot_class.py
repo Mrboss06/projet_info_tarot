@@ -62,4 +62,17 @@ class PartieTarot:
             print(self.joueurs[i][3].main)
         for i in range(4):
             self.send_msg(self.joueurs[i][0], 'action', 'recevoir_jeu', self.joueurs[i][3].main)
+        nb_prise_actuel = 0
+        for i in range(4):
+            self.send_msg(self.joueurs[i][0], 'action', 'choisir_prise')
+            while len(self.prises) == nb_prise_actuel:
+                pass
+            nb_prise_actuel = len(self.prises)
+        self.send_msg_to_all(f'les prises sont {self.prises}')
+        while 1: pass
+            
+    
+    def recevoir_prise(self, username, prise):
+        self.send_msg_to_all(f"{username} {'fait une '+prise if prise != 'passe' else 'passe'}!")
+        self.prises.append(prise)
 

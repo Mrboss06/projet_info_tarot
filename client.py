@@ -61,6 +61,12 @@ def recevoir_jeu(main):
     main_joueur.main=main
     print(f"J'ai reçu un jeu: {main}")
 
+def choisir_prise():
+    print('taper:\n 1 pour passer\n2 pour faire une petite\n3 pour faire une garde\n4 pour faire une garde-sans\n5 pour faire une garde-contre')
+    prise = input()
+    prise = ['passe', 'petite', 'garde', 'garde-sans', 'garde-contre'][int(prise)-1]
+    send(('LOBBY', 'action', 'recevoir_prise', prise))
+
 def username_est_valide(username):
     for charactere in username:
         if not (charactere.isalnum() or charactere in '-_'):
