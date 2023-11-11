@@ -56,7 +56,7 @@ def choisir_lobby(lst_lobbies):
         print("\nTon choix n'est pas dans les possibilitees")
         print(f"Tape + pour creer un nouveau lobby, sinon le numero du lobby que tu veux rejoindre")
         lobby = input()
-    print("\n")
+    print()
     if lobby != '+':
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
@@ -64,7 +64,7 @@ def choisir_lobby(lst_lobbies):
 
 def recevoir_jeu(main):
     main_joueur.main=main
-    print(f"Voici ton jeu:\n{main}\n****\n")
+    print(f"\nVoici ton jeu:\n{main}\n\n****\n")
 
 
 def verifier_reception_jeu():
