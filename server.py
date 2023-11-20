@@ -2,12 +2,11 @@ import socket
 import threading
 import pickle
 
-import game
 import tarot_class
 
 HEADER = 64
 PORT = 5050
-SERVER = '192.168.0.44'
+SERVER = '192.168.156.229'
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
@@ -25,7 +24,7 @@ lobbies = []
 def handle_client(conn: socket.socket, addr, username):
     print(f"[NEW CONNECTION] {username} connected")
     
-    dans_un_lobby = False
+    lobby = None
     
     lst_lobbies = get_liste_lobby()
     msg_send = pickle.dumps(('SERVER', 'action', 'choisir_lobby', lst_lobbies))
@@ -49,7 +48,12 @@ def handle_client(conn: socket.socket, addr, username):
                             numero = nouveau_lobby()
                         else:
                             numero = msg[3]
+                        lobby = numero
                         lobbies[obtenir_lobby_par_numero(numero)][0].nouveaux_joueurs.append((conn, addr, username))
+            if msg[0] == 'LOBBY':
+                if msg[1] == 'action':
+                    threading.Thread(target=eval(f"lobbies[{obtenir_lobby_par_numero(lobby)}][0].{msg[2]}"), args=[username, *msg[3:]]).start()
+                
             
     
     connections.remove([conn, addr, username])
@@ -69,7 +73,7 @@ def get_liste_lobby():
     lst_lobbies = []
     for lob in lobbies:
         current_lobby = ""
-        current_lobby += f"Lobby {lob[0].numero_lobby}({len(lob[0].joueurs)}): "
+        current_lobby += f"Lobby {lob[0].numero_lobby}({len(lob[0].joueurs)} personne{'s' if len(lob[0].joueurs)>1 else ''}): "
         for joueur in lob[0].joueurs:
             current_lobby += joueur[2]+'/'
         lst_lobbies.append((current_lobby, lob[0].numero_lobby))
