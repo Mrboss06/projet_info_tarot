@@ -2,12 +2,11 @@ import socket
 import threading
 import pickle
 
-import game
 import tarot_class
 
 HEADER = 64
 PORT = 5050
-SERVER = '192.168.0.44'
+SERVER = '192.168.156.229'
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
