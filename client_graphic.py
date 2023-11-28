@@ -3,6 +3,7 @@ import threading
 import pickle
 
 import joueur
+import graphic
 
 HEADER = 64
 PORT = 5050
@@ -11,7 +12,7 @@ DISCONNECT_MESSAGE = '!DISCONNECT'
 SERVER = '172.21.6.50'
 ADDR = (SERVER, PORT)
 
-
+gui_thread = threading.Thread(target=graphic.run)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -44,19 +45,15 @@ def handle_server():
 
 
 def choisir_lobby(lst_lobbies):
-    print("\nVoici les parties que tu peux rejoindre:\n")
     possible_lobbies = []
     for lobby in lst_lobbies:
         if lobby[0].count('/')<4:
-            print(lobby[0])
-            possible_lobbies.append(str(lobby[1]))
-    print(f"Tape + pour creer un nouveau lobby, sinon le numero du lobby que tu veux rejoindre")
-    lobby = input()
-    while lobby != '+' and not lobby in possible_lobbies:
-        print("\nTon choix n'est pas dans les possibilitees")
-        print(f"Tape + pour creer un nouveau lobby, sinon le numero du lobby que tu veux rejoindre")
-        lobby = input()
-    print()
+            possible_lobbies.append(lobby)
+    choix = [-1]
+    a = [(lobby[1], [member for member in lobby[0][lobby[0].index(":")+2:].split("/")[:-1]]) for lobby in lst_lobbies]
+    graphic.graphic_choisir_lobby.init_lobby(a, choix)
+    while choix[0]==-1: pass
+    lobby = choix[0]
     if lobby != '+':
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
@@ -93,6 +90,8 @@ def username_est_valide(username):
     return True
 
 
+
+
 print("Bienvenue au jeu de tarot!\n\n")
 print("Quel est votre pseudonyme ?")
 username = input()
@@ -100,6 +99,7 @@ username = input()
 while not username_est_valide(username):
     username = input("\nLe pseudonyme donné n'est pas valide\n\nPseudonyme: ")
 
+gui_thread.start()
 
 client.connect(ADDR)
 send(username)
