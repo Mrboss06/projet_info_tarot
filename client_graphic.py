@@ -9,7 +9,7 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '172.21.6.50'
+SERVER = '192.168.0.18'
 ADDR = (SERVER, PORT)
 
 gui_thread = threading.Thread(target=graphic.run)
@@ -52,7 +52,9 @@ def choisir_lobby(lst_lobbies):
     choix = [-1]
     a = [(lobby[1], [member for member in lobby[0][lobby[0].index(":")+2:].split("/")[:-1]]) for lobby in lst_lobbies]
     graphic.graphic_choisir_lobby.init_lobby(a, choix)
+    graphic.menu = 'choisir_lobby'
     while choix[0]==-1: pass
+    graphic.menu = ''
     lobby = choix[0]
     if lobby != '+':
         lobby = int(lobby)
@@ -90,16 +92,20 @@ def username_est_valide(username):
     return True
 
 
-
-
-print("Bienvenue au jeu de tarot!\n\n")
-print("Quel est votre pseudonyme ?")
-username = input()
-
-while not username_est_valide(username):
-    username = input("\nLe pseudonyme donné n'est pas valide\n\nPseudonyme: ")
+def choisir_pseudo():
+    choix = []
+    graphic.graphic_choisir_pseudo.init_choix_pseudo(choix)
+    graphic.menu = 'username'
+    print(graphic.menu)
+    while choix==[]: pass
+    graphic.menu = ''
+    print(f"[CLIENT] ton pseudo est {choix[0]}")
+    return choix[0]
 
 gui_thread.start()
+
+
+username = choisir_pseudo()
 
 client.connect(ADDR)
 send(username)
