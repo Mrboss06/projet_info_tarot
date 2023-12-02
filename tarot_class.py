@@ -22,7 +22,7 @@ class PartieTarot:
         while len(self.joueurs) != 4:
             if self.nouveaux_joueurs != []:
                 for nv_joueur in self.nouveaux_joueurs:
-                    self.send_msg_to_all("message", f'Le joueur {nv_joueur[2]} rejoint la partie')
+                    self.send_msg_to_all("action", "nouveau_joueur_dans_lobby", nv_joueur[2])
                     self.joueurs.append(nv_joueur + (joueur.Joueur(),))
                     self.send_msg(nv_joueur[0], "message", f"Tu as rejoint le lobby {self.numero_lobby}")
                 self.nouveaux_joueurs.clear()
