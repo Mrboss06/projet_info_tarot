@@ -54,7 +54,7 @@ def choisir_lobby(lst_lobbies):
     graphic.graphic_choisir_lobby.init_lobby(a, choix)
     graphic.menu = 'choisir_lobby'
     while choix[0]==-1: pass
-    graphic.menu = ''
+    graphic.menu = 'attente_dans_lobby'
     lobby = choix[0]
     if lobby != '+':
         lobby = int(lobby)
@@ -84,6 +84,9 @@ def choisir_prise(prises):
     else:
         prise -= 1
     send(('LOBBY', 'action', 'recevoir_prise', prise))
+
+def nouveau_joueur_dans_lobby(pseudo):
+    print(f"[LOBBY] le joueur {pseudo} a rejoint la partie")
 
 def username_est_valide(username):
     for charactere in username:

@@ -42,6 +42,8 @@ def run():
             graphic_choisir_pseudo.choisir_pseudo(ev)
         elif menu == 'choisir_lobby':
             graphic_choisir_lobby.selectionner_lobby(ev, mouse_pos)
+        elif menu == 'attente_dans_lobby':
+            screen.blit(font.render("En attente de joueurs", False, (255,)*3), (100, 100))
         else:
             screen.blit(font.render("En attente", False, (255, 255, 255)), (60, 60))
         

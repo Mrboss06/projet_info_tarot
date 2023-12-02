@@ -86,6 +86,9 @@ def choisir_prise(prises):
         prise -= 1
     send(('LOBBY', 'action', 'recevoir_prise', prise))
 
+def nouveau_joueur_dans_lobby(pseudo):
+    print(f"[LOBBY] le joueur {pseudo} a rejoint la partie !")
+
 def username_est_valide(username):
     for charactere in username:
         if not (charactere.isalnum() or charactere in '-_'):
