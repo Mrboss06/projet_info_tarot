@@ -1,21 +1,15 @@
-import pygame as pg
+import pygame
 
-screen = None
-
-def init(_screen):
-    global screen
-    screen = _screen
-
-
-COLOR_INACTIVE = pg.Color('lightskyblue3')
-COLOR_ACTIVE = pg.Color('dodgerblue2')
-FONT = pg.font.SysFont('Roboto', 30)
+COLOR_INACTIVE = pygame.Color('lightskyblue3')
+COLOR_ACTIVE = pygame.Color('dodgerblue2')
+FONT = pygame.font.SysFont('Roboto', 30)
 
 
 class InputBox:
 
-    def __init__(self, x, y, w, h, text=''):
-        self.rect = pg.Rect(x, y, w, h)
+    def __init__(self, screen: pygame.Surface, x: int, y: int, w: int, h: int, text: str =''):
+        self.screen = screen
+        self.rect = pygame.Rect(x, y, w, h)
         self.color = COLOR_INACTIVE
         self.text = text
         self.txt_surface = FONT.render(text, True, self.color)
@@ -24,7 +18,7 @@ class InputBox:
 
     def handle_event(self, events):
         for event in events:
-            if event.type == pg.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 # If the user clicked on the input_box rect.
                 if self.rect.collidepoint(event.pos):
                     # Toggle the active variable.
@@ -33,12 +27,12 @@ class InputBox:
                     self.active = False
                 # Change the current color of the input box.
                 self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
-            if event.type == pg.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 if self.active:
-                    if event.key == pg.K_RETURN:
+                    if event.key == pygame.K_RETURN:
                         self.var.append(self.text)
                         self.text = ''
-                    elif event.key == pg.K_BACKSPACE:
+                    elif event.key == pygame.K_BACKSPACE:
                         self.text = self.text[:-1]
                     else:
                         self.text += event.unicode
@@ -52,16 +46,20 @@ class InputBox:
 
     def draw(self):
         # Blit the rect.
-        pg.draw.rect(screen, self.color, self.rect, 3)
+        pygame.draw.rect(self.screen, self.color, self.rect, 3)
         # Blit the text.
-        screen.blit(self.txt_surface, (self.rect.x+10, self.rect.y+7))
+        self.screen.blit(self.txt_surface, (self.rect.x+10, self.rect.y+7))
 
-textinput = InputBox(400, 375, 100, 50)
 
-def init_choix_pseudo(choix):
-    textinput.var = choix
+class TabChooseUsername:
+    def __init__(self, screen: pygame.Surface) -> None:
+        self.screen = screen
+        self.textinput = InputBox(screen, 400, 375, 100, 50)
 
-def choisir_pseudo(event):
-    textinput.handle_event(event)
-    textinput.update()
-    textinput.draw()
+    def init_choix_pseudo(self, choix):
+        self.textinput.var = choix
+
+    def choisir_pseudo(self, event):
+        self.textinput.handle_event(event)
+        self.textinput.update()
+        self.textinput.draw()

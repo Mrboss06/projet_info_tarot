@@ -12,7 +12,10 @@ DISCONNECT_MESSAGE = '!DISCONNECT'
 SERVER = '192.168.0.18'
 ADDR = (SERVER, PORT)
 
-gui_thread = threading.Thread(target=graphic.run)
+
+window = graphic.Window()
+
+gui_thread = threading.Thread(target=window.run)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -50,12 +53,16 @@ def choisir_lobby(lst_lobbies):
         if lobby[0].count('/')<4:
             possible_lobbies.append(lobby)
     choix = [-1]
-    a = [(lobby[1], [member for member in lobby[0][lobby[0].index(":")+2:].split("/")[:-1]]) for lobby in lst_lobbies]
-    graphic.graphic_choisir_lobby.init_lobby(a, choix)
-    graphic.menu = 'choisir_lobby'
+    possible_lobbies = [(lobby[1], [member for member in lobby[0][lobby[0].index(":")+2:].split("/")[:-1]]) for lobby in lst_lobbies]
+    print(possible_lobbies)
+    window.tab_select_lobby.init_lobby(possible_lobbies, choix)
+    window.menu = 'choisir_lobby'
     while choix[0]==-1: pass
-    graphic.menu = 'attente_dans_lobby'
     lobby = choix[0]
+    for lob in possible_lobbies:
+        if lob[0] == lobby:
+            window.tab_waiting_in_lobby.init_attente(lobby, *lob[1])
+    window.menu = 'attente_dans_lobby'
     if lobby != '+':
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
@@ -87,6 +94,7 @@ def choisir_prise(prises):
 
 def nouveau_joueur_dans_lobby(pseudo):
     print(f"[LOBBY] le joueur {pseudo} a rejoint la partie")
+    window.tab_waiting_in_lobby.update(pseudo)
 
 def username_est_valide(username):
     for charactere in username:
@@ -97,11 +105,11 @@ def username_est_valide(username):
 
 def choisir_pseudo():
     choix = []
-    graphic.graphic_choisir_pseudo.init_choix_pseudo(choix)
-    graphic.menu = 'username'
-    print(graphic.menu)
+    window.tab_choose_username.init_choix_pseudo(choix)
+    window.menu = 'username'
+    print(window.menu)
     while choix==[]: pass
-    graphic.menu = ''
+    window.menu = ''
     print(f"[CLIENT] ton pseudo est {choix[0]}")
     return choix[0]
 
