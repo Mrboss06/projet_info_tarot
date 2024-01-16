@@ -8,7 +8,7 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '192.168.156.229'
+SERVER = '172.21.6.51'
 ADDR = (SERVER, PORT)
 
 
@@ -68,8 +68,8 @@ def recevoir_jeu(main):
 
 
 def verifier_reception_jeu():
-    if main_joueur.main == []:
-        send(("LOBBY", "action", "jeu_pas_recu"))
+   if main_joueur.main == []:
+       send(("LOBBY", "action", "jeu_pas_recu"))
 
 
 def choisir_prise(prises):
@@ -90,6 +90,18 @@ def username_est_valide(username):
         if not (charactere.isalnum() or charactere in '-_'):
             return False
     return True
+
+def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur):
+    print(f"c'est à vous de jouer, voici votre jeu: {main_joueur.main}")
+    print(f"voici les cartes qui ont déjà été jouées: {cartes_en_jeu}")
+    print("indice de la carte à jouer?")
+    carte_jouée=int(input())
+    cartes_en_jeu.append([main_joueur.main[carte_jouée], indice_joueur])
+    main_joueur.main.pop(carte_jouée)
+    if indice_joueur==0: 
+        couleur=main_joueur.main[carte_jouée]
+    send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, carte_jouée, cartes_en_jeu, couleur))
+
 
 
 print("Bienvenue au jeu de tarot!\n\n")

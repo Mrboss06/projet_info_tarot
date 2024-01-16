@@ -2,8 +2,10 @@ import tarot_class
 import joueur
 
 points=[0,0,0,0]
-#scores=[score du preneur, nb_bouts(du preneur)(index), index de la prise, index du preneur, annonces annexes(liste de jusqu'à 2 de longueur avec les annonces annexes(petit au bout, poignée) dans l'ordre suivant: suites puis petit au bout), index suite , vainqueur de la dernière levée (index du joueur ayant remporté le dernier pli) ]
-scores=[56, 0, 0, 0, [], 0, 0]
+#scores=[score dvu preneur, nb_bouts(du preneur)(index), index de la prise, index du preneur,
+#        annonces annexes(liste de jusqu'à 2 de longueur avec les annonces annexes(petit au bout, poignée) dans l'ordre suivant: suites puis petit au bout), 
+#        index suite , vainqueur de la dernière levée (index du joueur ayant remporté le dernier pli) ]
+scores=[56, 2, 1, 0, [1,2], 1, 0]
 parties = []
 
 SCORES_BOUTS=[56,51,41,36]
@@ -25,7 +27,7 @@ def calculer_les_scores(scores, points):
 def ajouter_annonces_annexes(scores, score_du_preneur, points):
     for i in range(5):
        if scores[4]!=[]:
-          if scores[4][0]==1:                                               #suites: +-4*score de l'index de suite pour le preneur, puis +-10*score de l'index de la suite pour tous
+          if scores[4][0]==1:                                               #suites: +-4*score de l'index de suite pour le preneur, puis +-1*score de l'index de la suite pour tous
               if score_du_preneur>=0:                                             
                  points[scores[3]]+=SCORES_SUITES[scores[5]]*4
                  for i in range (4): points[i]-=SCORES_SUITES[scores[5]]
@@ -48,6 +50,7 @@ print(points)
 #creer self.points, ajouter les points à chaque joueur
     
         
+
 
 
     
