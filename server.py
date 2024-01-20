@@ -7,6 +7,7 @@ import tarot_class
 HEADER = 64
 PORT = 5050
 SERVER = '192.168.200.111'
+
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
@@ -64,9 +65,9 @@ def get_liste_lobby():
     Renvoie la liste de tous les lobbies sous la forme d'une liste
     Par exemple:
     [
-        ('Lobby 0(3): joueur 1/joueur 2/joueur 3/', 0)
-        ('Lobby 1(1): joueur 1/', 1)
-        ('Lobby 2(0):', 2)
+        ('Lobby 0(3 personnes): joueur 1/joueur 2/joueur 3/', 0)
+        ('Lobby 1(1 personne): joueur 1/', 1)
+        ('Lobby 2(0 personne):', 2)
     ]
     
     """

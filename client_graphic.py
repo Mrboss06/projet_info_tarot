@@ -3,16 +3,16 @@ import threading
 import pickle
 
 import joueur
+import graphic
 
 HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-
-SERVER = '192.168.200.111'
+SERVER = '192.168.0.18'
 ADDR = (SERVER, PORT)
 
-
+gui_thread = threading.Thread(target=graphic.run)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -45,19 +45,17 @@ def handle_server():
 
 
 def choisir_lobby(lst_lobbies):
-    print("\nVoici les parties que tu peux rejoindre:\n")
     possible_lobbies = []
     for lobby in lst_lobbies:
         if lobby[0].count('/')<4:
-            print(lobby[0])
-            possible_lobbies.append(str(lobby[1]))
-    print(f"Tape + pour creer un nouveau lobby, sinon le numero du lobby que tu veux rejoindre")
-    lobby = input()
-    while lobby != '+' and not lobby in possible_lobbies:
-        print("\nTon choix n'est pas dans les possibilitees")
-        print(f"Tape + pour creer un nouveau lobby, sinon le numero du lobby que tu veux rejoindre")
-        lobby = input()
-    print()
+            possible_lobbies.append(lobby)
+    choix = [-1]
+    a = [(lobby[1], [member for member in lobby[0][lobby[0].index(":")+2:].split("/")[:-1]]) for lobby in lst_lobbies]
+    graphic.graphic_choisir_lobby.init_lobby(a, choix)
+    graphic.menu = 'choisir_lobby'
+    while choix[0]==-1: pass
+    graphic.menu = 'attente_dans_lobby'
+    lobby = choix[0]
     if lobby != '+':
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
@@ -70,20 +68,8 @@ def recevoir_jeu(main):
 
 
 def verifier_reception_jeu():
-   if main_joueur.main == []:
-       send(("LOBBY", "action", "jeu_pas_recu"))
-
-def faire_son_chien(chien):
-    for i in range(6):
-        main_joueur.main.append(chien[i])
-    for i in range(6):
-        print(f"Voici votre main: {main_joueur.main}")
-        print("Choisissez l'index d'une carte à retirer:")
-        carte_a_retirer=int(input())
-        main_joueur.plis.append(main_joueur.main[carte_a_retirer])
-        main_joueur.main.pop(carte_a_retirer)
-    send(('LOBBY', 'action', 'jeux'))    
-
+    if main_joueur.main == []:
+        send(("LOBBY", "action", "jeu_pas_recu"))
 
 
 def choisir_prise(prises):
@@ -100,7 +86,7 @@ def choisir_prise(prises):
     send(('LOBBY', 'action', 'recevoir_prise', prise))
 
 def nouveau_joueur_dans_lobby(pseudo):
-    print(f"[LOBBY] le joueur {pseudo} a rejoint la partie !")
+    print(f"[LOBBY] le joueur {pseudo} a rejoint la partie")
 
 def username_est_valide(username):
     for charactere in username:
@@ -108,41 +94,21 @@ def username_est_valide(username):
             return False
     return True
 
-def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur):
-    print(f"c'est à vous de jouer, voici votre jeu: {main_joueur.main}")
-    print(f"voici les cartes qui ont déjà été jouées: {cartes_en_jeu}")
-    print("indice de la carte à jouer?")
-    carte_jouée=int(input())
-    cartes_en_jeu.append([main_joueur.main[carte_jouée], indice_joueur])
-    if indice_joueur==0: 
-        couleur=main_joueur.main[carte_jouée]
-    main_joueur.main.pop(carte_jouée)    
-    send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, carte_jouée, cartes_en_jeu, couleur))
 
-def fin_de_partie(plis, index_preneur, index_prise):
-    score=0
-    nb_bouts=0
-    for pli in plis:
-        for i in range(len(pli)):
-            score+=pli[i][0][2]
-            if pli[i][0]==['atout', 1, 4.5] or pli[i][0]==['atout', 21, 4.5] or pli[i][0]==['atout', 0, 4.5]:
-                nb_bouts+=1
-    send(('LOBBY', 'action', 'scores', score, nb_bouts, index_prise, index_preneur))
-#rajouter les annonces annexes#
+def choisir_pseudo():
+    choix = []
+    graphic.graphic_choisir_pseudo.init_choix_pseudo(choix)
+    graphic.menu = 'username'
+    print(graphic.menu)
+    while choix==[]: pass
+    graphic.menu = ''
+    print(f"[CLIENT] ton pseudo est {choix[0]}")
+    return choix[0]
+
+gui_thread.start()
 
 
-
-    
-    
-
-
-print("Bienvenue au jeu de tarot!\n\n")
-print("Quel est votre pseudonyme ?")
-username = input()
-
-while not username_est_valide(username):
-    username = input("\nLe pseudonyme donné n'est pas valide\n\nPseudonyme: ")
-
+username = choisir_pseudo()
 
 client.connect(ADDR)
 send(username)
