@@ -8,7 +8,8 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '192.168.0.18'
+
+SERVER = '192.168.200.111'
 ADDR = (SERVER, PORT)
 
 
@@ -69,8 +70,20 @@ def recevoir_jeu(main):
 
 
 def verifier_reception_jeu():
-    if main_joueur.main == []:
-        send(("LOBBY", "action", "jeu_pas_recu"))
+   if main_joueur.main == []:
+       send(("LOBBY", "action", "jeu_pas_recu"))
+
+def faire_son_chien(chien):
+    for i in range(6):
+        main_joueur.main.append(chien[i])
+    for i in range(6):
+        print(f"Voici votre main: {main_joueur.main}")
+        print("Choisissez l'index d'une carte à retirer:")
+        carte_a_retirer=int(input())
+        main_joueur.plis.append(main_joueur.main[carte_a_retirer])
+        main_joueur.main.pop(carte_a_retirer)
+    send(('LOBBY', 'action', 'jeux'))    
+
 
 
 def choisir_prise(prises):
@@ -94,6 +107,33 @@ def username_est_valide(username):
         if not (charactere.isalnum() or charactere in '-_'):
             return False
     return True
+
+def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur):
+    print(f"c'est à vous de jouer, voici votre jeu: {main_joueur.main}")
+    print(f"voici les cartes qui ont déjà été jouées: {cartes_en_jeu}")
+    print("indice de la carte à jouer?")
+    carte_jouée=int(input())
+    cartes_en_jeu.append([main_joueur.main[carte_jouée], indice_joueur])
+    if indice_joueur==0: 
+        couleur=main_joueur.main[carte_jouée]
+    main_joueur.main.pop(carte_jouée)    
+    send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, carte_jouée, cartes_en_jeu, couleur))
+
+def fin_de_partie(plis, index_preneur, index_prise):
+    score=0
+    nb_bouts=0
+    for pli in plis:
+        for i in range(len(pli)):
+            score+=pli[i][0][2]
+            if pli[i][0]==['atout', 1, 4.5] or pli[i][0]==['atout', 21, 4.5] or pli[i][0]==['atout', 0, 4.5]:
+                nb_bouts+=1
+    send(('LOBBY', 'action', 'scores', score, nb_bouts, index_prise, index_preneur))
+#rajouter les annonces annexes#
+
+
+
+    
+    
 
 
 print("Bienvenue au jeu de tarot!\n\n")
