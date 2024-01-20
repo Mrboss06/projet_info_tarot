@@ -13,7 +13,7 @@ MULTIPLICATEURS=[1,2,4,6]
 SCORES_SUITES=[20,30,40]
 
 
-def calculer_les_scores(scores, points):             
+def calculer_scores(scores, points):             
     score_du_preneur=scores[0]-SCORES_BOUTS[scores[1]]
     if score_du_preneur>=0:
         score_preneur=(score_du_preneur+25)*MULTIPLICATEURS[scores[2]]*3
@@ -44,7 +44,7 @@ def ajouter_annonces_annexes(scores, score_du_preneur, points):
                  for i in range (4): points[i]+=10*(scores[2]+1) 
     return points
 
-calculer_les_scores(scores, points)
+calculer_scores(scores, points)
 ajouter_annonces_annexes(scores, 0, points)
 print(points)  
 #creer self.points, ajouter les points à chaque joueur
