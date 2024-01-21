@@ -147,7 +147,15 @@ class PartieTarot:
             if self.joueurs[0][3].main==[]:
                 for i in range(4):
                     if self.joueurs[i][3].prises!=0:
-                        self.send_msg(self.joueurs[i][0], "action", "fin_de_partie", self.joueurs[i][3].plis, i, self.joueurs[i][3].prises)
+                        score=0
+                        nb_bouts=0
+                        for pli in self.joueurs[i][3].plis:
+                            for j in range(len(pli)):
+                                score+=pli[j][0][2]
+                                if pli[j][0]==['atout', 1, 4.5] or pli[j][0]==['atout', 21, 4.5] or pli[j][0]==['atout', 0, 4.5]:
+                                    nb_bouts+=1
+                        self.calculer_scores(score, nb_bouts, self.joueurs[i][3].prises, i, points)
+                        print(points)
             else:
                 self.send_msg(self.joueurs[0][0], "action", "jouer_une_carte", [], 0, couleur)
 
@@ -166,11 +174,6 @@ class PartieTarot:
             else: points[i][1]+=score_adversaires    
         return points
 
-    
-    def scores(self, username, score, nb_bouts, index_prise, index_preneur):   
-        self.calculer_scores(score, nb_bouts, index_prise, index_preneur, points)
-        print(points)
-
            
             
             
@@ -181,3 +184,4 @@ class PartieTarot:
 #empècher de mettre atouts et rois dans le chien
 #refaire les liaisons pour faire le chien
 #ajouter option en fin de partie: recommencer ou qqch comme ça
+#s'occuper du cas où tout le monde passe

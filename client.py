@@ -119,15 +119,6 @@ def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur):
     main_joueur.main.pop(carte_jouée)    
     send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, carte_jouée, cartes_en_jeu, couleur))
 
-def fin_de_partie(plis, index_preneur, index_prise):
-    score=0
-    nb_bouts=0
-    for pli in plis:
-        for i in range(len(pli)):
-            score+=pli[i][0][2]
-            if pli[i][0]==['atout', 1, 4.5] or pli[i][0]==['atout', 21, 4.5] or pli[i][0]==['atout', 0, 4.5]:
-                nb_bouts+=1
-    send(('LOBBY', 'action', 'scores', score, nb_bouts, index_prise, index_preneur))
 #rajouter les annonces annexes#
 
 
