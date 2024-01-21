@@ -23,7 +23,6 @@ class TabSelectLobby:
             self.rects.append(LobbyRect(self.screen, lobbies[i][0], lobbies[i][1], ((i%3)*250+150, (i//3)*210+150)))
 
     def selectionner_lobby(self, event, mouse_pos: "tuple[int, int]") -> None:
-        self.screen.fill((0,0,0))
         self.screen.blit(FONT_TITLE.render("Selection De Lobby", False, (255,)*3), (150,50))
         clicked = False
         for ev in event:
