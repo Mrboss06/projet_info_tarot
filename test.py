@@ -1,9 +1,7 @@
-import server
-import client
-import tarot_class
 import joueur
-import socket
-import threading
-import pickle
-import time
-import random
+
+main_joueur=joueur.Joueur()
+
+print(main_joueur)
+
+FAIRE UN TEST POUR TROUVER LES BONS JEUX DE TAROT
