@@ -9,14 +9,19 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '192.168.0.18'
+SERVER = '192.168.0.46'
 ADDR = (SERVER, PORT)
 
-gui_thread = threading.Thread(target=graphic.run)
+
+
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 main_joueur = joueur.Joueur()
+
+window = graphic.Window(main_joueur)
+
+gui_thread = threading.Thread(target=window.run)
 
 def send(msg):
     message = pickle.dumps(msg)
@@ -50,12 +55,16 @@ def choisir_lobby(lst_lobbies):
         if lobby[0].count('/')<4:
             possible_lobbies.append(lobby)
     choix = [-1]
-    a = [(lobby[1], [member for member in lobby[0][lobby[0].index(":")+2:].split("/")[:-1]]) for lobby in lst_lobbies]
-    graphic.graphic_choisir_lobby.init_lobby(a, choix)
-    graphic.menu = 'choisir_lobby'
+    possible_lobbies = [(lobby[1], [member for member in lobby[0][lobby[0].index(":")+2:].split("/")[:-1]]) for lobby in lst_lobbies]
+    print(possible_lobbies)
+    window.tab_select_lobby.init_lobby(possible_lobbies, choix)
+    window.menu = 'choisir_lobby'
     while choix[0]==-1: pass
-    graphic.menu = 'attente_dans_lobby'
     lobby = choix[0]
+    for lob in possible_lobbies:
+        if lob[0] == lobby:
+            window.tab_waiting_in_lobby.init_attente(lobby, *lob[1])
+    window.menu = 'attente_dans_lobby'
     if lobby != '+':
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
@@ -63,7 +72,10 @@ def choisir_lobby(lst_lobbies):
 
 
 def recevoir_jeu(main):
+    correspondance_carte = {"coeur": 400, "pique": 300, "carreau": 200, "trèfle": 100, "atout": 0}
+    main.sort(key=lambda x: correspondance_carte[x[0]]+x[1])
     main_joueur.main=main
+    window.menu = 'tour_de_jeu'
     print(f"\nVoici ton jeu:\n{main}\n\n****\n")
 
 
@@ -87,6 +99,7 @@ def choisir_prise(prises):
 
 def nouveau_joueur_dans_lobby(pseudo):
     print(f"[LOBBY] le joueur {pseudo} a rejoint la partie")
+    window.tab_waiting_in_lobby.update(pseudo)
 
 def username_est_valide(username):
     for charactere in username:
@@ -97,11 +110,11 @@ def username_est_valide(username):
 
 def choisir_pseudo():
     choix = []
-    graphic.graphic_choisir_pseudo.init_choix_pseudo(choix)
-    graphic.menu = 'username'
-    print(graphic.menu)
+    window.tab_choose_username.init_choix_pseudo(choix)
+    window.menu = 'username'
+    print(window.menu)
     while choix==[]: pass
-    graphic.menu = ''
+    window.menu = ''
     print(f"[CLIENT] ton pseudo est {choix[0]}")
     return choix[0]
 
@@ -116,4 +129,3 @@ send(username)
 server_thread = threading.Thread(target=handle_server)
 
 server_thread.start()
-
