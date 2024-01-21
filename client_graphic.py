@@ -9,17 +9,19 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '172.21.6.50'
+SERVER = '192.168.0.46'
 ADDR = (SERVER, PORT)
 
 
-window = graphic.Window()
 
-gui_thread = threading.Thread(target=window.run)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 main_joueur = joueur.Joueur()
+
+window = graphic.Window(main_joueur)
+
+gui_thread = threading.Thread(target=window.run)
 
 def send(msg):
     message = pickle.dumps(msg)
@@ -70,7 +72,10 @@ def choisir_lobby(lst_lobbies):
 
 
 def recevoir_jeu(main):
+    correspondance_carte = {"coeur": 400, "pique": 300, "carreau": 200, "trèfle": 100, "atout": 0}
+    main.sort(key=lambda x: correspondance_carte[x[0]]+x[1])
     main_joueur.main=main
+    window.menu = 'tour_de_jeu'
     print(f"\nVoici ton jeu:\n{main}\n\n****\n")
 
 
@@ -81,15 +86,17 @@ def verifier_reception_jeu():
 
 def choisir_prise(prises):
     print("\n** C'est à vous d'annoncer **\nQue voulez vous faire ?\n\ntaper:\n1 pour passer")
-    possibilites = ["pour une petite", "pour une garde", "pour une garde-sans", "pour une garde-contre"]
+    possibilites = ["Petite", "Garde", "Garde-sans", "Garde-contre"]
     plus_petite_annonce_possible = max(prises)+1 if prises != [] else 1
-    for i in range(0, 5-plus_petite_annonce_possible):
-        print(f"{i+2} {possibilites[i+plus_petite_annonce_possible-1]}")
-    prise = int(input())
-    if prise != 1:
-        prise += plus_petite_annonce_possible - 2
-    else:
-        prise -= 1
+    
+    prises_possibles = ["Je passe"] + [possibilites[i+plus_petite_annonce_possible-1] for i in range(0, 5-plus_petite_annonce_possible)]
+    lst_annonce = [""]
+    window.tab_tour_de_jeu.init_annonce(prises_possibles, lst_annonce)
+    
+    while lst_annonce[0] == "": pass
+    
+    prise = ["Je passe", "Petite", "Garde", "Garde-sans", "Garde-contre"].index(lst_annonce[0])
+    
     send(('LOBBY', 'action', 'recevoir_prise', prise))
 
 def nouveau_joueur_dans_lobby(pseudo):
