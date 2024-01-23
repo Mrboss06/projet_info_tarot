@@ -9,7 +9,7 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '192.168.0.46'
+SERVER = '127.0.0.0'
 ADDR = (SERVER, PORT)
 
 
@@ -72,17 +72,18 @@ def choisir_lobby(lst_lobbies):
 
 
 def recevoir_jeu(main):
-    correspondance_carte = {"coeur": 400, "pique": 300, "carreau": 200, "trèfle": 100, "atout": 0}
+    correspondance_carte = {"coeur": 400, "pique": 300, "carreau": 200, "trefle": 100, "atout": 0}
     main.sort(key=lambda x: correspondance_carte[x[0]]+x[1])
     main_joueur.main=main
-    window.menu = 'tour_de_jeu'
+    window.menu = 'choix_annonce'
     print(f"\nVoici ton jeu:\n{main}\n\n****\n")
-
 
 def verifier_reception_jeu():
     if main_joueur.main == []:
         send(("LOBBY", "action", "jeu_pas_recu"))
 
+def prise_par_qqn(username, prise):
+    window.tab_choix_annonce.annonces.append((username, prise))
 
 def choisir_prise(prises):
     print("\n** C'est à vous d'annoncer **\nQue voulez vous faire ?\n\ntaper:\n1 pour passer")
@@ -91,13 +92,17 @@ def choisir_prise(prises):
     
     prises_possibles = ["Je passe"] + [possibilites[i+plus_petite_annonce_possible-1] for i in range(0, 5-plus_petite_annonce_possible)]
     lst_annonce = [""]
-    window.tab_tour_de_jeu.init_annonce(prises_possibles, lst_annonce)
+    window.tab_choix_annonce.init_annonce(prises_possibles, lst_annonce)
     
     while lst_annonce[0] == "": pass
     
     prise = ["Je passe", "Petite", "Garde", "Garde-sans", "Garde-contre"].index(lst_annonce[0])
     
     send(('LOBBY', 'action', 'recevoir_prise', prise))
+
+def faire_son_chien(chien):
+    window.tab_choix_chien.init(main_joueur.main, chien)
+    window.menu = 'faire_son_chien'
 
 def nouveau_joueur_dans_lobby(pseudo):
     print(f"[LOBBY] le joueur {pseudo} a rejoint la partie")

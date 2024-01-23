@@ -3,7 +3,9 @@ import sys
 import graphic_choisir_lobby
 import graphic_choisir_pseudo
 import graphic_attente_dans_lobby
+import graphic_choix_annonce
 import graphic_tour_de_jeu
+import graphic_faire_son_chien
 from joueur import Joueur
 from graphic_constant import SCREEN_HEIGHT, SCREEN_WIDTH, CARD_SIZE
 
@@ -26,6 +28,8 @@ class Window:
         self.tab_choose_username = graphic_choisir_pseudo.TabChooseUsername(self.screen)
         self.tab_select_lobby = graphic_choisir_lobby.TabSelectLobby(self.screen)
         self.tab_waiting_in_lobby = graphic_attente_dans_lobby.WaitingInLobby(self.screen)
+        self.tab_choix_annonce = graphic_choix_annonce.ChoixAnnonce(self.screen, self.cardsImg)
+        self.tab_choix_chien = graphic_faire_son_chien.FaireChien(self.screen, self.cardsImg)
         self.tab_tour_de_jeu = graphic_tour_de_jeu.TourDeJeu(self.screen, self.cardsImg)
         self.menu = ''
         self.joueur = joueur
@@ -54,6 +58,10 @@ class Window:
                 self.tab_select_lobby.selectionner_lobby(events, mouse_pos)
             elif self.menu == 'attente_dans_lobby':
                 self.tab_waiting_in_lobby.draw()
+            elif self.menu == 'choix_annonce':
+                self.tab_choix_annonce.update(events, mouse_pos, self.joueur.main)
+            elif self.menu == 'faire_son_chien':
+                self.tab_choix_chien.update(events, mouse_pos)
             elif self.menu == 'tour_de_jeu':
                 self.tab_tour_de_jeu.update(events, mouse_pos, self.joueur.main)
             else:

@@ -1,11 +1,10 @@
 import pygame
 import sys
-from math import cos, sin, radians
 from graphic_constant import CARD_SIZE, MID_X, MID_Y, SPACE_BETWEEN, CARD_Y, SELECTED_CARD_Y
 
 FONT_ANNONCE = pygame.font.SysFont('Roboto', 25)
 
-class TourDeJeu:
+class ChoixAnnonce:
     def __init__(self, screen: pygame.Surface, cards: dict) -> None:
         self.screen = screen
         self.font = pygame.font.SysFont("Roboto", 20)
@@ -22,7 +21,6 @@ class TourDeJeu:
         
         self.preneur = ""
         self.preneur_annonce = ""
-        self.attente_chien = True
     
     def draw_cards(self, main: 'list[tuple[str, int, int]]'):
         x = round(MID_X-((SPACE_BETWEEN*(len(main)-1))/2)-CARD_SIZE.x/2)
@@ -59,33 +57,18 @@ class TourDeJeu:
             txt = FONT_ANNONCE.render(f"{self.annonces[i][0]} {('fait une ' + ['petite', 'garde', 'garde-sans', 'garde-contre'][self.annonces[i][1]-1] if self.annonces[i][1] != 0 else 'passe')}", False, (255, 255, 255))
             self.screen.blit(txt, (20, 20+35*i))
     
-    def dessiner_annonce_finale(self):
-        txt = FONT_ANNONCE.render(f"{self.preneur} fait une {self.preneur_annonce}")
-    
     def update(self, events, mouse_pos: 'tuple[int, int]', main: 'list[tuple[str, int, int]]'):
         
         mouse_clicked = False
         for ev in events:
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 mouse_clicked = True
-        
-        if self.phase_annonce:
-            if self.choisir_annonce_bool:
-                self.choisir_annonce(mouse_clicked, mouse_pos)
-                if self.selected_annonce != "":
-                    self.lst_annonce[0] = self.selected_annonce
-                    self.choisir_annonce_bool = False
-            self.dessiner_annonce()
                 
-        
-        x = round(MID_X-((SPACE_BETWEEN*(len(main)-1))/2)-CARD_SIZE.x/2)
-        card_rects = [pygame.Rect((x+i*SPACE_BETWEEN, CARD_Y), CARD_SIZE) for i in range(len(main))]
-        old_selected = self.selected
-        for i in range(len(main)):
-            if mouse_clicked and card_rects[i].collidepoint(mouse_pos):
-                if old_selected == i:
-                    self.selected = -1
-                else:
-                    self.selected = i
+        if self.choisir_annonce_bool:
+            self.choisir_annonce(mouse_clicked, mouse_pos)
+            if self.selected_annonce != "":
+                self.lst_annonce[0] = self.selected_annonce
+                self.choisir_annonce_bool = False
+        self.dessiner_annonce()
         
         self.draw_cards(main)
