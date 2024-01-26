@@ -86,7 +86,6 @@ def prise_par_qqn(username, prise):
     window.tab_choix_annonce.annonces.append((username, prise))
 
 def choisir_prise(prises):
-    print("\n** C'est à vous d'annoncer **\nQue voulez vous faire ?\n\ntaper:\n1 pour passer")
     possibilites = ["Petite", "Garde", "Garde-sans", "Garde-contre"]
     plus_petite_annonce_possible = max(prises)+1 if prises != [] else 1
     
@@ -101,8 +100,54 @@ def choisir_prise(prises):
     send(('LOBBY', 'action', 'recevoir_prise', prise))
 
 def faire_son_chien(chien):
-    window.tab_choix_chien.init(main_joueur.main, chien)
+    chien_carte_index = []
+    window.tab_choix_chien.init(main_joueur.main, chien, chien_carte_index)
     window.menu = 'faire_son_chien'
+    
+    while chien_carte_index == []: pass
+    
+    chien_choisi = [main_joueur.main[index] for index in chien_carte_index]
+    
+    for carte in chien_choisi:
+        main_joueur.main.remove(carte)
+    
+    correspondance_carte = {"coeur": 400, "pique": 300, "carreau": 200, "trefle": 100, "atout": 0}
+    main_joueur.main.sort(key=lambda x: correspondance_carte[x[0]]+x[1])
+    
+    send(('LOBBY', 'action', 'jeux', chien_choisi))
+
+def carte_jouee(username, carte_en_jeu):
+    pass
+
+def prise_jouee(username, prise):
+    window.tab_attente_chien.init_attente(username, prise)
+    window.menu = 'attente_chien'
+
+def debut_partie(username):
+    window.menu = 'tour_de_jeu'
+    
+
+def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
+    print(f"c'est à vous de jouer, voici votre jeu: {main_joueur.main}")
+    print(f"voici les cartes qui ont déjà été jouées: {cartes_en_jeu}")
+    print("indice de la carte à jouer?")
+    carte_jouée=int(input())
+    while carte_jouée>=len(main_joueur.main):
+        print('index trop élevé, réessayez')
+        carte_jouée=int(input())
+    if main_joueur.main[carte_jouée]==['atout', 0, 4.5] and main_joueur.main!=[['atout', 0, 4.5]]:
+        cartes_en_jeu.append([['NULL', 0, 0.5], indice_joueur])
+    elif main_joueur==['atout', 0, 4.5]:
+        cartes_en_jeu.append(['NULL', 0, 4.5], indice_joueur)
+    else:
+        cartes_en_jeu.append([main_joueur.main[carte_jouée], indice_joueur])
+        if indice_joueur==0 and main_joueur.main[carte_jouée][0]!='NULL': 
+            couleur=main_joueur.main[carte_jouée][0]
+        if indice_joueur==1 and cartes_en_jeu[0][0][0]=='NULL':
+            couleur=main_joueur.main[carte_jouée][0]
+    main_joueur.main.pop(carte_jouée)    
+    send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, cartes_en_jeu, couleur, tour))
+
 
 def nouveau_joueur_dans_lobby(pseudo):
     print(f"[LOBBY] le joueur {pseudo} a rejoint la partie")

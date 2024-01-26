@@ -68,25 +68,45 @@ def recevoir_jeu(main):
     main_joueur.main=main
     print(f"\nVoici ton jeu:\n{main}\n\n****\n")
 
-def prise_par_qqn(username, prise):
-    print(f"{username} fait une '{['Passe', 'Petite', 'Garde', 'Garde-sans', 'Garde-contre'][prise]}'")
 
 def verifier_reception_jeu():
    if main_joueur.main == []:
        send(("LOBBY", "action", "jeu_pas_recu"))
 
+def prise_par_qqn(username, prise):
+    print(f"{username} a fait une '{['Passe', 'Petite', 'Garde', 'Garde-sans', 'Garde-contre'][prise]}'")
+
 def faire_son_chien(chien):
+    chien_joueur=[]
+    a='-1'
     for i in range(6):
         main_joueur.main.append(chien[i])
+    jeu=main_joueur.main    
     for i in range(6):
-        print(f"Voici votre main: {main_joueur.main}")
+        print(f"Voici votre main: {jeu}")
         print("Choisissez l'index d'une carte à retirer:")
         carte_a_retirer=int(input())
-        main_joueur.plis.append(main_joueur.main[carte_a_retirer])
-        main_joueur.main.pop(carte_a_retirer)
-    send(('LOBBY', 'action', 'jeux'))    
+        while carte_a_retirer>=len(jeu):
+            print('Index trop élevé, réessayez.')
+            carte_a_retirer=int(input())
+        chien_joueur.append(main_joueur.main[carte_a_retirer])
+        jeu.pop(carte_a_retirer)
+    while a!='1' and a!='0':
+        print(f'Voici votre chien: {chien_joueur}')    
+        print('Si il vous convient, appuyez sur 1, sinon pour le refaire,appuyez sur 0:')
+        a=input()
+        if a!='0' and a!='1':
+            print('ce caractère n est pas valide')    
+    if a=='1':
+        send(('LOBBY', 'action', 'jeux', chien_joueur))
+    elif a=='0':
+        faire_son_chien(chien_joueur)   
 
+def prise_jouee(username, prise):
+    print(f"C'est {username} qui prend, avec une {['Petite', 'garde', 'garde-sans', 'garde-contre'][prise-1]}")
 
+def debut_partie(username):
+    print(f"La partie commence, le joueur {username} joue")
 
 def choisir_prise(prises):
     print("\n** C'est à vous d'annoncer **\nQue voulez vous faire ?\n\ntaper:\n1 pour passer")
@@ -110,26 +130,30 @@ def username_est_valide(username):
             return False
     return True
 
-def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur):
+def carte_jouee(username, carte_en_jeu):
+    print(f"{username} a joue une carte, voici les cartes en jeu: '{carte_en_jeu}'")
+
+def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
     print(f"c'est à vous de jouer, voici votre jeu: {main_joueur.main}")
     print(f"voici les cartes qui ont déjà été jouées: {cartes_en_jeu}")
     print("indice de la carte à jouer?")
     carte_jouée=int(input())
-    cartes_en_jeu.append([main_joueur.main[carte_jouée], indice_joueur])
-    if indice_joueur==0: 
-        couleur=main_joueur.main[carte_jouée]
+    while carte_jouée>=len(main_joueur.main):
+        print('index trop élevé, réessayez')
+        carte_jouée=int(input())
+    if main_joueur.main[carte_jouée]==['atout', 0, 4.5] and main_joueur.main!=[['atout', 0, 4.5]]:
+        cartes_en_jeu.append([['NULL', 0, 0.5], indice_joueur])
+    elif main_joueur==['atout', 0, 4.5]:
+        cartes_en_jeu.append(['NULL', 0, 4.5], indice_joueur)
+    else:
+        cartes_en_jeu.append([main_joueur.main[carte_jouée], indice_joueur])
+        if indice_joueur==0 and main_joueur.main[carte_jouée][0]!='NULL': 
+            couleur=main_joueur.main[carte_jouée][0]
+        if indice_joueur==1 and cartes_en_jeu[0][0][0]=='NULL':
+            couleur=main_joueur.main[carte_jouée][0]
     main_joueur.main.pop(carte_jouée)    
-    send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, carte_jouée, cartes_en_jeu, couleur))
+    send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, cartes_en_jeu, couleur, tour))
 
-def fin_de_partie(plis, index_preneur, index_prise):
-    score=0
-    nb_bouts=0
-    for pli in plis:
-        for i in range(len(pli)):
-            score+=pli[i][0][2]
-            if pli[i][0]==['atout', 1, 4.5] or pli[i][0]==['atout', 21, 4.5] or pli[i][0]==['atout', 0, 4.5]:
-                nb_bouts+=1
-    send(('LOBBY', 'action', 'scores', score, nb_bouts, index_prise, index_preneur))
 #rajouter les annonces annexes#
 
 

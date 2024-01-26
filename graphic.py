@@ -6,6 +6,7 @@ import graphic_attente_dans_lobby
 import graphic_choix_annonce
 import graphic_tour_de_jeu
 import graphic_faire_son_chien
+import graphic_attente_chien
 from joueur import Joueur
 from graphic_constant import SCREEN_HEIGHT, SCREEN_WIDTH, CARD_SIZE
 
@@ -30,6 +31,7 @@ class Window:
         self.tab_waiting_in_lobby = graphic_attente_dans_lobby.WaitingInLobby(self.screen)
         self.tab_choix_annonce = graphic_choix_annonce.ChoixAnnonce(self.screen, self.cardsImg)
         self.tab_choix_chien = graphic_faire_son_chien.FaireChien(self.screen, self.cardsImg)
+        self.tab_attente_chien = graphic_attente_chien.AttenteChien(self.screen)
         self.tab_tour_de_jeu = graphic_tour_de_jeu.TourDeJeu(self.screen, self.cardsImg)
         self.menu = ''
         self.joueur = joueur
@@ -62,6 +64,8 @@ class Window:
                 self.tab_choix_annonce.update(events, mouse_pos, self.joueur.main)
             elif self.menu == 'faire_son_chien':
                 self.tab_choix_chien.update(events, mouse_pos)
+            elif self.menu == 'attente_chien':
+                self.tab_attente_chien.update()
             elif self.menu == 'tour_de_jeu':
                 self.tab_tour_de_jeu.update(events, mouse_pos, self.joueur.main)
             else:
