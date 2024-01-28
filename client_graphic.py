@@ -64,6 +64,8 @@ def choisir_lobby(lst_lobbies):
     for lob in possible_lobbies:
         if lob[0] == lobby:
             window.tab_waiting_in_lobby.init_attente(lobby, *lob[1])
+    window.tab_tour_de_jeu.joueurs.extend(lob[1])
+    window.tab_tour_de_jeu.joueurs.append("Vous")
     window.menu = 'attente_dans_lobby'
     if lobby != '+':
         lobby = int(lobby)
@@ -76,7 +78,9 @@ def recevoir_jeu(main):
     main.sort(key=lambda x: correspondance_carte[x[0]]+x[1])
     main_joueur.main=main
     window.menu = 'choix_annonce'
-    print(f"\nVoici ton jeu:\n{main}\n\n****\n")
+    for _ in range(4):
+        if window.tab_tour_de_jeu.joueurs[0] != "Vous":
+            window.tab_tour_de_jeu.joueurs.append(window.tab_tour_de_jeu.joueurs.pop(0))
 
 def verifier_reception_jeu():
     if main_joueur.main == []:
@@ -117,7 +121,9 @@ def faire_son_chien(chien):
     send(('LOBBY', 'action', 'jeux', chien_choisi))
 
 def carte_jouee(username, carte_en_jeu):
+    window.tab_tour_de_jeu.carte_jouee_par(username, carte_en_jeu)
     pass
+    
 
 def prise_jouee(username, prise):
     window.tab_attente_chien.init_attente(username, prise)
@@ -125,7 +131,6 @@ def prise_jouee(username, prise):
 
 def debut_partie(username):
     window.menu = 'tour_de_jeu'
-    
 
 def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
     print(f"c'est à vous de jouer, voici votre jeu: {main_joueur.main}")
@@ -152,6 +157,7 @@ def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
 def nouveau_joueur_dans_lobby(pseudo):
     print(f"[LOBBY] le joueur {pseudo} a rejoint la partie")
     window.tab_waiting_in_lobby.update(pseudo)
+    window.tab_tour_de_jeu.joueurs.append(pseudo)
 
 def username_est_valide(username):
     for charactere in username:
