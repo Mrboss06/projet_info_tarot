@@ -43,11 +43,18 @@ class TourDeJeu:
         self.animations: 'list[Animation]' = []
         self.joueurs = []
         self.nb_carte_autre_joueur = [18, 18, 18]
+        self.jouer_une_carte = False
+        self.couleur = 'atout'
+        self.carte_jouee = []
+        self.cartes_a_jouer_possibles = []
     
     def draw_cards(self, main: 'list[tuple[str, int, int]]'):
         x = round(MID_X-((SPACE_BETWEEN*(len(main)-1))/2)-CARD_SIZE.x/2)
         for i in range(len(main)):
             card: pygame.Surface = self.cardsImg[f"{self.cards_correspondance[main[i][0]]}{main[i][1]}"]
+            if self.jouer_une_carte and not main[i] in self.cartes_a_jouer_possibles:
+                card = card.copy()
+                card.fill((150, 150, 150, 255), None, pygame.BLEND_RGBA_MULT)
             self.screen.blit(card, 
                             (x+i*SPACE_BETWEEN, CARD_Y-SELECTED_CARD_Y*(self.selected == i)))
     
@@ -84,10 +91,7 @@ class TourDeJeu:
     
     def carte_jouee_par(self, username: str, carte_en_jeu):
         carte_jouee = carte_en_jeu[-1][0]
-        if username == self.joueurs[0]:
-            x_debut = MID_X - CARD_SIZE.x // 2
-            y_debut = CARD_Y
-        elif username == self.joueurs[1]:
+        if username == self.joueurs[1]:
             x_debut = - CARD_SIZE.x
             y_debut = MID_Y2 - CARD_SIZE.y // 2
             self.nb_carte_autre_joueur[0] -= 1
@@ -99,10 +103,44 @@ class TourDeJeu:
             x_debut = SCREEN_WIDTH + CARD_SIZE.x
             y_debut = MID_Y2 - CARD_SIZE.y // 2
             self.nb_carte_autre_joueur[2] -= 1
+        else:
+            x_debut = MID_X - CARD_SIZE.x // 2
+            y_debut = CARD_Y
         x_fin = MID_X - (CARD_SIZE.x + SPACE_BETWEEN*3) // 2 + SPACE_BETWEEN*len(self.carte_en_jeu)
         y_fin = MID_Y2 - CARD_SIZE.y // 2
             
         self.animations.append(Animation(self.screen, carte_jouee, self.cardsImg[self.cards_correspondance[carte_jouee[0]] + str(carte_jouee[1])], x_debut, y_debut, x_fin, y_fin, 0.5, self.carte_en_jeu))
+    
+    def init_cartes_a_jouer_possibles(self, main, couleur: str):
+        self.cartes_a_jouer_possibles = set()
+        # d'abord on check si le jeu a des cartes de la couleur demandee
+        if couleur != 0:
+            if couleur != 'atout':
+                for i in main:
+                    if i[0] == couleur:
+                        self.cartes_a_jouer_possibles.add(i)
+            # si il y pas la couleur demandee dans le jeu, on check si il y a des atouts
+            if self.cartes_a_jouer_possibles == set():
+                max_atout = 0
+                atouts = set()
+                for carte in self.carte_en_jeu:
+                    if carte[0] == 'atout' and carte[1] > max_atout:
+                        max_atout = carte[1]
+                for carte in main:
+                    if carte[0] == 'atout' and carte[1] > 0:
+                        atouts.add(carte)
+                        if max_atout < carte[1]:
+                            self.cartes_a_jouer_possibles.add(carte)
+                # si il y a pas d'atouts au dessus du plus grand atout joué, alors on ajoute tous les atouts de la main
+                if self.cartes_a_jouer_possibles == set():
+                    self.cartes_a_jouer_possibles = atouts
+        # si il y a pas d'atout dans le jeu, alors on peut jouer ce qu'on veut
+        if self.cartes_a_jouer_possibles == set():
+            self.cartes_a_jouer_possibles = set(main)
+        # et on rajoute l'excuse dans les cartes possibles
+        elif ('atout', 0, 4.5) in main:
+            self.cartes_a_jouer_possibles.add(('atout', 0, 4.5))
+        
     
     def update(self, events, mouse_pos: 'tuple[int, int]', main: 'list[tuple[str, int, int]]'):
         
@@ -117,9 +155,17 @@ class TourDeJeu:
         for i in range(len(main)):
             if mouse_clicked and card_rects[i].collidepoint(mouse_pos):
                 if old_selected == i:
-                    self.selected = -1
+                    self.selected = -2
                 else:
                     self.selected = i
+        if self.selected == -2:
+            if self.jouer_une_carte and main[old_selected] in self.cartes_a_jouer_possibles:
+                self.carte_jouee[1] = old_selected
+                self.carte_jouee[2] = main.copy()
+                self.carte_jouee[0] = main[old_selected]
+                main.pop(old_selected)
+            else:
+                self.selected = -1
         
         self.draw_cards(main)
         self.draw_pseudos()

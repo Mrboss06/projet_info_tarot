@@ -55,6 +55,8 @@ class PartieTarot:
     def distribuer(self):
         a=0
         jeu=[['coeur', 1, 0.5], ['coeur', 2, 0.5], ['coeur', 3, 0.5], ['coeur', 4, 0.5], ['coeur', 5, 0.5], ['coeur', 6, 0.5], ['coeur', 7, 0.5], ['coeur', 8, 0.5], ['coeur', 9, 0.5], ['coeur', 10, 0.5], ['coeur', 11, 1.5], ['coeur', 12, 2.5], ['coeur', 13, 3.5], ['coeur', 14, 4.5], ['pique', 1, 0.5], ['pique', 2, 0.5], ['pique', 3, 0.5], ['pique', 4, 0.5], ['pique', 5, 0.5], ['pique', 6, 0.5], ['pique', 7, 0.5], ['pique', 8, 0.5], ['pique', 9, 0.5], ['pique', 10, 0.5], ['pique', 11, 1.5], ['pique', 12, 2.5], ['pique', 13, 3.5], ['pique', 14, 4.5], ['carreau', 1, 0.5], ['carreau', 2, 0.5], ['carreau', 3, 0.5], ['carreau', 4, 0.5], ['carreau', 5, 0.5], ['carreau', 6, 0.5], ['carreau', 7, 0.5], ['carreau', 8, 0.5], ['carreau', 9, 0.5], ['carreau', 10, 0.5], ['carreau', 11, 1.5], ['carreau', 12, 2.5], ['carreau', 13, 3.5], ['carreau', 14, 4.5], ['trefle', 1, 0.5], ['trefle', 2, 0.5], ['trefle', 3, 0.5], ['trefle', 4, 0.5], ['trefle', 5, 0.5], ['trefle', 6, 0.5], ['trefle', 7, 0.5], ['trefle', 8, 0.5], ['trefle', 9, 0.5], ['trefle', 10, 0.5], ['trefle', 11, 1.5], ['trefle', 12, 2.5], ['trefle', 13, 3.5], ['trefle', 14, 4.5], ['atout', 1, 4.5], ['atout', 2, 0.5], ['atout', 3, 0.5], ['atout', 4, 0.5], ['atout', 5, 0.5], ['atout', 6, 0.5], ['atout', 7, 0.5], ['atout', 8, 0.5], ['atout', 9, 0.5], ['atout', 10, 0.5], ['atout', 11, 0.5], ['atout', 12, 0.5], ['atout', 13, 0.5], ['atout', 14, 0.5], ['atout', 15, 0.5], ['atout', 16, 0.5], ['atout', 17, 0.5], ['atout', 18, 0.5], ['atout', 19, 0.5], ['atout', 20, 0.5], ['atout', 21, 4.5], ['atout', 0, 4.5]]
+        for carte in range(len(jeu)):
+            jeu[carte] = tuple(jeu[carte])
         for i in range (4):
             self.joueurs[i][3].main=[]
         for j in range (4):
@@ -112,10 +114,12 @@ class PartieTarot:
         if cartes_en_jeu[indice_joueur][0]==['NULL', 0, 0.5]:
             self.joueurs[indice_joueur][3].plis.append([[['NULL', 0, 4.5], 0], [['NULL', 0, -0.5], 0]])
         atouts_en_jeu=[]
+        self.send_msg_to_all("action", "carte_jouee", username, cartes_en_jeu)
         if len(cartes_en_jeu)!=4:
-            self.send_msg_to_all("action", "carte_jouee", username, cartes_en_jeu)
             self.send_msg(self.joueurs[indice_joueur+1][0], "action", "jouer_une_carte", cartes_en_jeu, indice_joueur+1, couleur, tour)
         elif len(cartes_en_jeu)==4:
+            time.sleep(1)
+            self.send_msg_to_all("action", "fin_du_pli")
             for j in range(4):
                 if cartes_en_jeu[j][0][0]=="atout" and cartes_en_jeu[j][0][1]!=0:
                     atouts_en_jeu.append([cartes_en_jeu[j][0], cartes_en_jeu[j][1]])

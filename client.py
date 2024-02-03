@@ -154,6 +154,9 @@ def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
     main_joueur.main.pop(carte_jouée)    
     send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, cartes_en_jeu, couleur, tour))
 
+def fin_du_pli():
+    print('fin du pli')
+
 #rajouter les annonces annexes#
 
 
