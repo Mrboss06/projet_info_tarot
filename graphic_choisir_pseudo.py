@@ -1,8 +1,8 @@
 import pygame
+from graphic_constant import FONT_TITLE, FONT
 
-COLOR_INACTIVE = pygame.Color('lightskyblue3')
-COLOR_ACTIVE = pygame.Color('dodgerblue2')
-FONT = pygame.font.SysFont('Roboto', 30)
+COLOR_INACTIVE = pygame.Color('gray')
+COLOR_ACTIVE = pygame.Color('white')
 
 
 class InputBox:
@@ -48,13 +48,15 @@ class InputBox:
         # Blit the rect.
         pygame.draw.rect(self.screen, self.color, self.rect, 3)
         # Blit the text.
-        self.screen.blit(self.txt_surface, (self.rect.x+10, self.rect.y+7))
+        self.screen.blit(self.txt_surface, (self.rect.x+10, self.rect.y+2))
 
 
 class TabChooseUsername:
     def __init__(self, screen: pygame.Surface) -> None:
         self.screen = screen
-        self.textinput = InputBox(screen, 400, 375, 100, 50)
+        self.backgroundImg = pygame.image.load('assets/bg.png')
+        self.textinput = InputBox(screen, 100, 400, 200, 50)
+        self.boutonJouer = pygame.Rect(100, 500, 200, 60)
 
     def init_choix_pseudo(self, choix):
         self.textinput.var = choix
@@ -63,3 +65,13 @@ class TabChooseUsername:
         self.textinput.handle_event(event)
         self.textinput.update()
         self.textinput.draw()
+    
+    def update(self, events):
+        
+        self.screen.blit(self.backgroundImg, (0, 0))
+        
+        self.screen.blit(FONT_TITLE.render("Tarot", False, (255,255,255)), (100, 100))
+        self.choisir_pseudo(events)
+        pygame.draw.rect(self.screen, (255, 0, 0), self.boutonJouer, border_radius=10)
+        txt_jouer = FONT.render('JOUER', False, 'white')
+        self.screen.blit(txt_jouer, (110, 510))

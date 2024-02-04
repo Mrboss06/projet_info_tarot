@@ -21,7 +21,6 @@ main_joueur = joueur.Joueur()
 
 window = graphic.Window(main_joueur)
 
-gui_thread = threading.Thread(target=window.run)
 
 def send(msg):
     message = pickle.dumps(msg)
@@ -184,15 +183,21 @@ def choisir_pseudo():
     print(f"[CLIENT] ton pseudo est {choix[0]}")
     return choix[0]
 
-gui_thread.start()
+def connect_to_server():
+    username = choisir_pseudo()
+    client.connect(ADDR)
+    send(username)
+
+    server_thread = threading.Thread(target=handle_server)
+    server_thread.start()
+    
+
+start_thread = threading.Thread(target=connect_to_server)
+start_thread.start()
+
+window.run()
 
 
-username = choisir_pseudo()
 
-client.connect(ADDR)
-send(username)
 
-server_thread = threading.Thread(target=handle_server)
-
-server_thread.start()
 

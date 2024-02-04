@@ -20,6 +20,7 @@ class Window:
     def __init__(self, joueur: Joueur) -> None:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.font = pygame.font.SysFont('Roboto', 50)
+        self.backgroundImg = pygame.image.load('assets/bg.png')
         
         self.cardsImg = {}
         for card in ["dos", "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "A16", "A17", "A18", "A19", "A20", "A21", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13", "C14", "K1", "K2", "K3", "K4", "K5", "K6", "K7", "K8", "K9", "K10", "K11", "K12", "K13", "K14", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12", "P13", "P14", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12", "T13", "T14"]:
@@ -40,7 +41,7 @@ class Window:
         running = True
         while running:
             
-            self.screen.fill((0,0,0))
+            #self.screen.blit(self.backgroundImg, (0, 0))
             
             events = pygame.event.get()
             
@@ -54,8 +55,7 @@ class Window:
             #pygame.draw.rect(screen, (255,0,0), rect)
             
             if self.menu == 'username':
-                self.screen.blit(self.font.render("Ton pseudo", False, (255,255,255)), (50, 100))
-                self.tab_choose_username.choisir_pseudo(events)
+                self.tab_choose_username.update(events)
             elif self.menu == 'choisir_lobby':
                 self.tab_select_lobby.selectionner_lobby(events, mouse_pos)
             elif self.menu == 'attente_dans_lobby':
