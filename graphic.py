@@ -42,7 +42,7 @@ class Window:
         while running:
             
             #self.screen.blit(self.backgroundImg, (0, 0))
-            
+            self.screen.fill((0, 0, 0))
             events = pygame.event.get()
             
             for event in events:
