@@ -115,10 +115,10 @@ class PartieTarot:
             self.joueurs[indice_joueur][3].plis.append([[['NULL', 0, 4.5], 0], [['NULL', 0, -0.5], 0]])
         atouts_en_jeu=[]
         self.send_msg_to_all("action", "carte_jouee", username, cartes_en_jeu)
+        time.sleep(1)
         if len(cartes_en_jeu)!=4:
             self.send_msg(self.joueurs[indice_joueur+1][0], "action", "jouer_une_carte", cartes_en_jeu, indice_joueur+1, couleur, tour)
         elif len(cartes_en_jeu)==4:
-            time.sleep(1)
             self.send_msg_to_all("action", "fin_du_pli")
             for j in range(4):
                 if cartes_en_jeu[j][0][0]=="atout" and cartes_en_jeu[j][0][1]!=0:
@@ -192,7 +192,7 @@ class PartieTarot:
         return points
     
 
-           
+            
             
             
             

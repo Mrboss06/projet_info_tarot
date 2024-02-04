@@ -49,14 +49,17 @@ class TourDeJeu:
         self.cartes_a_jouer_possibles = []
     
     def draw_cards(self, main: 'list[tuple[str, int, int]]'):
-        x = round(MID_X-((SPACE_BETWEEN*(len(main)-1))/2)-CARD_SIZE.x/2)
-        for i in range(len(main)):
-            card: pygame.Surface = self.cardsImg[f"{self.cards_correspondance[main[i][0]]}{main[i][1]}"]
-            if self.jouer_une_carte and not main[i] in self.cartes_a_jouer_possibles:
-                card = card.copy()
-                card.fill((150, 150, 150, 255), None, pygame.BLEND_RGBA_MULT)
-            self.screen.blit(card, 
-                            (x+i*SPACE_BETWEEN, CARD_Y-SELECTED_CARD_Y*(self.selected == i)))
+        try:
+            x = round(MID_X-((SPACE_BETWEEN*(len(main)-1))/2)-CARD_SIZE.x/2)
+            for i in range(len(main)):
+                card: pygame.Surface = self.cardsImg[f"{self.cards_correspondance[main[i][0]]}{main[i][1]}"]
+                if self.jouer_une_carte and not main[i] in self.cartes_a_jouer_possibles:
+                    card = card.copy()
+                    card.fill((150, 150, 150, 255), None, pygame.BLEND_RGBA_MULT)
+                self.screen.blit(card, 
+                                (x+i*SPACE_BETWEEN, CARD_Y-SELECTED_CARD_Y*(self.selected == i)))
+        except:
+            pass
     
     def draw_pseudos(self):
         txt1 = FONT_PSEUDO.render(self.joueurs[1], False, (255, 255, 255))
@@ -84,9 +87,12 @@ class TourDeJeu:
             self.screen.blit(carte_dos_tournee, (SCREEN_WIDTH - 30, y + i*SPACE_BETWEEN2))
     
     def draw_plis(self):
-        for i in range(len(self.carte_en_jeu)):
-            carteImg = self.cardsImg[self.cards_correspondance[self.carte_en_jeu[i][0]]+str(self.carte_en_jeu[i][1])]
-            self.screen.blit(carteImg, (MID_X - (CARD_SIZE.x + SPACE_BETWEEN*3) // 2 + SPACE_BETWEEN*i, MID_Y2 - CARD_SIZE.y // 2))
+        try:
+            for i in range(len(self.carte_en_jeu)):
+                carteImg = self.cardsImg[self.cards_correspondance[self.carte_en_jeu[i][0]]+str(self.carte_en_jeu[i][1])]
+                self.screen.blit(carteImg, (MID_X - (CARD_SIZE.x + SPACE_BETWEEN*3) // 2 + SPACE_BETWEEN*i, MID_Y2 - CARD_SIZE.y // 2))
+        except: 
+            pass
             
     
     def carte_jouee_par(self, username: str, carte_en_jeu):
