@@ -9,7 +9,7 @@ PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
 
-SERVER = '127.0.0.0'
+SERVER = '172.21.6.50'
 ADDR = (SERVER, PORT)
 
 
@@ -70,8 +70,8 @@ def recevoir_jeu(main):
 
 
 def verifier_reception_jeu():
-   if main_joueur.main == []:
-       send(("LOBBY", "action", "jeu_pas_recu"))
+    if main_joueur.main == []:
+        send(("LOBBY", "action", "jeu_pas_recu"))
 
 def prise_par_qqn(username, prise):
     print(f"{username} a fait une '{['Passe', 'Petite', 'Garde', 'Garde-sans', 'Garde-contre'][prise]}'")
