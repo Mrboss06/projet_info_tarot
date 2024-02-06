@@ -10,6 +10,7 @@ class WaitingInLobby:
         self.font_player = pygame.font.SysFont('Roboto', 30)
         self.numero_lobby = -1
         self.player_waiting = []
+        self.backgroundImg = pygame.image.load('assets/backgrounds/bg_lobby.png')
     
     def init_attente(self, numero_lobby, *joueurs):
         self.player_waiting = list(joueurs)
@@ -17,6 +18,8 @@ class WaitingInLobby:
         self.numero_lobby = numero_lobby
     
     def draw(self):
+        self.screen.blit(self.backgroundImg, (0, 0))
+        
         self.screen.blit(self.font_title.render(f'Lobby {self.numero_lobby}', False, (255, )*3), (50, 50))
         for i in range(len(self.player_waiting)):
             self.screen.blit(self.font_player.render(self.player_waiting[i], False, (255, )*3), (50, 120+i*35))

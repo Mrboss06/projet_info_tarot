@@ -74,4 +74,4 @@ class TabChooseUsername:
         self.choisir_pseudo(events)
         pygame.draw.rect(self.screen, (255, 0, 0), self.boutonJouer, border_radius=10)
         txt_jouer = FONT.render('JOUER', False, 'white')
-        self.screen.blit(txt_jouer, (110, 510))
+        self.screen.blit(txt_jouer, (130, 510))

@@ -9,7 +9,7 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '172.21.6.50'
+SERVER = '127.0.0.0'
 ADDR = (SERVER, PORT)
 
 
@@ -70,6 +70,9 @@ def choisir_lobby(lst_lobbies):
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
 
+
+def dans_lobby(numero_lobby):
+    window.tab_waiting_in_lobby.numero_lobby = numero_lobby
 
 
 def recevoir_jeu(main):

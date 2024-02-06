@@ -6,7 +6,7 @@ import tarot_class
 
 HEADER = 64
 PORT = 5050
-SERVER = '172.21.6.50'
+SERVER = '127.0.0.0'
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
@@ -48,6 +48,8 @@ def handle_client(conn: socket.socket, addr, username):
                             numero = nouveau_lobby()
                         else:
                             numero = msg[3]
+                        msg_send = pickle.dumps(('SERVER', 'action', 'dans_lobby', numero))
+                        conn.send(msg_send)
                         lobby = numero
                         lobbies[obtenir_lobby_par_numero(numero)][0].nouveaux_joueurs.append((conn, addr, username))
             if msg[0] == 'LOBBY':

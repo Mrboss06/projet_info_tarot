@@ -15,4 +15,8 @@ SELECTED_CARD_Y = 40
 MID_Y2 = 300
 
 FONT_TITLE = pygame.font.Font('assets/fonts/SEVESBRG.TTF', 150)
+FONT_60 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 60)
+FONT_50 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 50)
 FONT = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 40)
+FONT_30 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 30)
+FONT_20 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 40)
