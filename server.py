@@ -110,7 +110,8 @@ def obtenir_lobby_par_numero(numero):
 def start():
     server.listen()
     print(f"[LISTENING] server is listening on {ADDR}")
-    nouveau_lobby()
+    for i in range(15):
+        nouveau_lobby()
     while True:
         conn, addr = server.accept()
         username = pickle.loads(conn.recv(2048))

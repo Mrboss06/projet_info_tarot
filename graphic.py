@@ -45,9 +45,13 @@ class Window:
             self.screen.fill((0, 0, 0))
             events = pygame.event.get()
             
+            mouse_clicked = False
+            
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_clicked = True
             
             mouse_pos = pygame.mouse.get_pos()
             
@@ -55,7 +59,7 @@ class Window:
             #pygame.draw.rect(screen, (255,0,0), rect)
             
             if self.menu == 'username':
-                self.tab_choose_username.update(events)
+                self.tab_choose_username.update(events, mouse_clicked, mouse_pos)
             elif self.menu == 'choisir_lobby':
                 self.tab_select_lobby.selectionner_lobby(events, mouse_pos)
             elif self.menu == 'attente_dans_lobby':

@@ -1,9 +1,10 @@
 import pygame
-from graphic_constant import FONT_TITLE, FONT
+from graphic_constant import FONT_TITLE, FONT_40
 
 COLOR_INACTIVE = pygame.Color('gray')
 COLOR_ACTIVE = pygame.Color('white')
 
+pygame.font.init()
 
 class InputBox:
 
@@ -12,7 +13,7 @@ class InputBox:
         self.rect = pygame.Rect(x, y, w, h)
         self.color = COLOR_INACTIVE
         self.text = text
-        self.txt_surface = FONT.render(text, True, self.color)
+        self.txt_surface = FONT_40.render(text, True, self.color)
         self.active = False
         self.var = []
 
@@ -29,7 +30,7 @@ class InputBox:
                 self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
             if event.type == pygame.KEYDOWN:
                 if self.active:
-                    if event.key == pygame.K_RETURN:
+                    if event.key == pygame.K_RETURN and self.text != '':
                         self.var.append(self.text)
                         self.text = ''
                     elif event.key == pygame.K_BACKSPACE:
@@ -37,7 +38,7 @@ class InputBox:
                     else:
                         self.text += event.unicode
                     # Re-render the text.
-                    self.txt_surface = FONT.render(self.text, True, self.color)
+                    self.txt_surface = FONT_40.render(self.text, True, self.color)
 
     def update(self):
         # Resize the box if the text is too long.
@@ -66,12 +67,21 @@ class TabChooseUsername:
         self.textinput.update()
         self.textinput.draw()
     
-    def update(self, events):
+    def update(self, events, mouse_clicked, mouse_pos):
         
         self.screen.blit(self.backgroundImg, (0, 0))
         
         self.screen.blit(FONT_TITLE.render("Tarot", False, (255,255,255)), (100, 100))
         self.choisir_pseudo(events)
-        pygame.draw.rect(self.screen, (255, 0, 0), self.boutonJouer, border_radius=10)
-        txt_jouer = FONT.render('JOUER', False, 'white')
-        self.screen.blit(txt_jouer, (130, 510))
+        
+        if self.boutonJouer.collidepoint(mouse_pos):
+            if mouse_clicked and self.textinput.text != '':
+                self.textinput.var.append(self.textinput.text)
+                self.textinput.text = ''
+            color = (230, 0, 0)
+        else:
+            color = (255, 0, 0)
+        
+        pygame.draw.rect(self.screen, color, self.boutonJouer, border_radius=10)
+        txt_jouer = FONT_40.render('JOUER', False, 'white')
+        self.screen.blit(txt_jouer, (135, 508))
