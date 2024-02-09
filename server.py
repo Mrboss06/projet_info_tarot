@@ -110,7 +110,7 @@ def obtenir_lobby_par_numero(numero):
 def start():
     server.listen()
     print(f"[LISTENING] server is listening on {ADDR}")
-    for i in range(15):
+    for _ in range(2):
         nouveau_lobby()
     while True:
         conn, addr = server.accept()
