@@ -1,6 +1,7 @@
 import socket
 import threading
 import pickle
+import time
 
 import tarot_class
 
@@ -15,10 +16,9 @@ DISCONNECT_MESSAGE = '!DISCONNECT'
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
-messages = []
 connections = []
 
-lobbies = []
+lobbies: 'list[tuple[tarot_class.PartieTarot, threading.Thread]]' = []
 
 
 def handle_client(conn: socket.socket, addr, username):
@@ -38,7 +38,6 @@ def handle_client(conn: socket.socket, addr, username):
             connected = False
             print(f"[{username}] disconnected")
             conn.send(pickle.dumps(DISCONNECT_MESSAGE))
-            messages.append(('[DECONNECTION]', username))
         else:
             if msg[0] == 'SERVER':
                 if msg[1] == "action":
@@ -48,10 +47,23 @@ def handle_client(conn: socket.socket, addr, username):
                             numero = nouveau_lobby()
                         else:
                             numero = msg[3]
-                        msg_send = pickle.dumps(('SERVER', 'action', 'dans_lobby', numero))
+                        print(numero)
+                        pseudos = lobbies[obtenir_lobby_par_numero(numero)][0].obtenir_noms_joueur()
+                        msg_send = pickle.dumps(('SERVER', 'action', 'dans_lobby', numero, pseudos))
                         conn.send(msg_send)
                         lobby = numero
                         lobbies[obtenir_lobby_par_numero(numero)][0].nouveaux_joueurs.append((conn, addr, username))
+                        
+                    elif msg[2] == 'quitter_lobby':
+                        print("[SERVER] un joueur sort d'un lobby")
+                        lobbies[obtenir_lobby_par_numero(numero)][0].anciens_joueurs.append(username)
+                        msg_send = pickle.dumps(('SERVER', 'action', 'choisir_lobby', get_liste_lobby()))
+                        conn.send(msg_send)
+                        
+                    elif msg[2] == "obtenir_lst_lobby":
+                        msg_send = pickle.dumps(('SERVER', 'action', 'mettre_a_jour_list_lobby', get_liste_lobby()))
+                        conn.send(msg_send)
+                        
             if msg[0] == 'LOBBY':
                 if msg[1] == 'action':
                     threading.Thread(target=eval(f"lobbies[{obtenir_lobby_par_numero(lobby)}][0].{msg[2]}"), args=[username, *msg[3:]]).start()
@@ -81,7 +93,7 @@ def get_liste_lobby():
         lst_lobbies.append((current_lobby, lob[0].numero_lobby))
     return lst_lobbies
 
-def nouveau_lobby():
+def nouveau_lobby() -> int:
     """
     Crée un nouveau lobby, soit une nouvelle instance de la classe PartieTarot dans un nouveau Thread
     Le nouveau thread et la nouvelle instance sont ajoutés à la liste 'lobbies' sous la forme d'un tuple (tarot_class.PartieTarot, threading.Thread)
@@ -96,9 +108,9 @@ def nouveau_lobby():
     print(f"[NUMBER OF LOBBY] {len(lobbies)}")
     return min_numero_lobby
 
-def obtenir_lobby_par_numero(numero):
+def obtenir_lobby_par_numero(numero: int) -> 'int | bool':
     """
-    Renvoie un tuple (tarot_class.PartieTarot, threading.Thread) de 'lobbies'
+    Renvoie l'index d'un tuple (tarot_class.PartieTarot, threading.Thread) de 'lobbies'
     Le PartieTarot de ce tuple a comme 'numero_lobby' l'argument donné à la fonction
     Renvoie False si aucun lobby n'a ce numero
     """

@@ -63,7 +63,7 @@ class Window:
             elif self.menu == 'choisir_lobby':
                 self.tab_select_lobby.selectionner_lobby(events, mouse_pos)
             elif self.menu == 'attente_dans_lobby':
-                self.tab_waiting_in_lobby.draw()
+                self.tab_waiting_in_lobby.draw(mouse_pos, mouse_clicked)
             elif self.menu == 'choix_annonce':
                 self.tab_choix_annonce.update(events, mouse_pos, self.joueur.main)
             elif self.menu == 'faire_son_chien':

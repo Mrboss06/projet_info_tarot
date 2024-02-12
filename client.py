@@ -62,8 +62,11 @@ def choisir_lobby(lst_lobbies):
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
 
-def dans_lobby(numero):
-    print(f'tu rentres dans le lobby {numero}')
+def joueur_quitte_lobby(pseudo):
+    print(f"Le joueur {pseudo} quitte le lobby")
+
+def dans_lobby(numero, pseudos):
+    print(f'tu rentres dans le lobby {numero} avec les joueurs: {pseudos}')
 
 
 def recevoir_jeu(main):

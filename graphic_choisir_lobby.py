@@ -23,6 +23,12 @@ class TabSelectLobby:
             self.rects.append(RectLobby(self.screen, lobbies[i][0], lobbies[i][1], pygame.Vector2((i%3)*250+150, (i//3)*210+150)))
         self.rects.append(RectNewLobby(self.screen, pygame.Vector2(((i+1)%3)*250+150, ((i+1)//3)*210+150)))
 
+    def mettre_a_jour_list_lobby(self, list_lobby: list):
+        self.rects.clear()
+        for i in range(len(list_lobby)):
+            self.rects.append(RectLobby(self.screen, list_lobby[i][0], list_lobby[i][1], pygame.Vector2((i%3)*250+150, (i//3)*210+150)))
+        self.rects.append(RectNewLobby(self.screen, pygame.Vector2(((i+1)%3)*250+150, ((i+1)//3)*210+150)))
+    
     def selectionner_lobby(self, event, mouse_pos: "tuple[int, int]") -> None:
         
         self.screen.blit(self.backgroundImg, (0, 0))

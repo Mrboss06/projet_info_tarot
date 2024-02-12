@@ -19,10 +19,24 @@ class PartieTarot:
         self.joueurs = []
         # dans nouveaux joueurs, on rajoute les nouveaux participants, de la forme (socket.socket, addresse, username)
         self.nouveaux_joueurs = []
+        self.anciens_joueurs = []
         self.numero_lobby = numero_lobby
         self.a_commence = False
         self.prises = []
         self.jeu=1
+    
+    def obtenir_noms_joueur(self) -> 'list[str]':
+        """
+        Retourne une liste contenant tous les pseudos des joueurs dans la partie
+        """
+        joueurs = [j[2] for j in self.joueurs] + [j[2] for j in self.nouveaux_joueurs]
+        return joueurs
+    
+    def obtenir_joueur_par_nom(self, pseudo: str) -> 'tuple[socket.socket, str, str, joueur.Joueur] | bool':
+        for j in self.joueurs:
+            if j[2] == pseudo:
+                return j
+        return False
     
     def run(self):
         while len(self.joueurs) != 4:
@@ -32,6 +46,13 @@ class PartieTarot:
                     self.joueurs.append(nv_joueur + (joueur.Joueur(),))
                     self.send_msg(nv_joueur[0], "message", f"Tu as rejoint le lobby {self.numero_lobby}")
                 self.nouveaux_joueurs.clear()
+            if self.anciens_joueurs != []:
+                for ancien_joueur in self.anciens_joueurs:
+                    print(f"[LOBBY {self.numero_lobby}] le joueur {ancien_joueur} part")
+                    self.send_msg(self.obtenir_joueur_par_nom(ancien_joueur)[0], "message", f"Tu as quitté le lobby {self.numero_lobby}")
+                    self.joueurs.remove(self.obtenir_joueur_par_nom(ancien_joueur))
+                    self.send_msg_to_all("action", "joueur_quitte_lobby", ancien_joueur)
+                self.anciens_joueurs.clear()
         for i in range(4):
             points.append([self.joueurs[i][2], 0])     
         self.send_msg_to_all("message", 'Tous les joueurs sont connectes, la partie commence')

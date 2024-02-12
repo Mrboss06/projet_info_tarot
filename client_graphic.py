@@ -1,6 +1,7 @@
 import socket
 import threading
 import pickle
+import time
 
 import joueur
 import graphic
@@ -58,21 +59,36 @@ def choisir_lobby(lst_lobbies):
     print(possible_lobbies)
     window.tab_select_lobby.init_lobby(possible_lobbies, choix)
     window.menu = 'choisir_lobby'
-    while choix[0]==-1: pass
+    timer = time.monotonic()
+    while choix[0]==-1:
+        if time.monotonic() - timer > 5:
+            send(('SERVER', 'action', 'obtenir_lst_lobby'))
+            timer = time.monotonic()
+        
     lobby = choix[0]
-    for lob in possible_lobbies:
-        if lob[0] == lobby:
-            window.tab_waiting_in_lobby.init_attente(lobby, *lob[1])
-    window.tab_tour_de_jeu.joueurs.extend(lob[1])
-    window.tab_tour_de_jeu.joueurs.append("Vous")
-    window.menu = 'attente_dans_lobby'
     if lobby != '+':
         lobby = int(lobby)
     client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
 
+def mettre_a_jour_list_lobby(list_lobby: list):
+    possible_lobbies = []
+    for lobby in list_lobby:
+        if lobby[0].count('/')<4:
+            possible_lobbies.append(lobby)
+    choix = [-1]
+    possible_lobbies = [(lobby[1], [member for member in lobby[0][lobby[0].index(":")+2:].split("/")[:-1]]) for lobby in list_lobby]
+    window.tab_select_lobby.mettre_a_jour_list_lobby(possible_lobbies)
 
-def dans_lobby(numero_lobby):
-    window.tab_waiting_in_lobby.numero_lobby = numero_lobby
+def dans_lobby(numero_lobby: int, pseudos: 'list[str]'):
+    window.menu = 'attente_dans_lobby'
+    choix = [-1]
+    window.tab_waiting_in_lobby.init_attente(numero_lobby, choix, *pseudos)
+    
+    
+    while window.menu == 'attente_dans_lobby' and choix[0] == -1: pass
+    
+    if window.menu == 'attente_dans_lobby':
+        send(('SERVER', "action", 'quitter_lobby'))
 
 
 def recevoir_jeu(main):
