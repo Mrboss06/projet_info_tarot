@@ -68,6 +68,8 @@ def joueur_quitte_lobby(pseudo):
 def dans_lobby(numero, pseudos):
     print(f'tu rentres dans le lobby {numero} avec les joueurs: {pseudos}')
 
+def debut_prises(list_pseudo):
+    pass
 
 def recevoir_jeu(main):
     main_joueur.main=main

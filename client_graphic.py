@@ -17,11 +17,9 @@ ADDR = (SERVER, PORT)
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
 main_joueur = joueur.Joueur()
-
 window = graphic.Window(main_joueur)
-
+username = ""
 
 def send(msg):
     message = pickle.dumps(msg)
@@ -88,7 +86,10 @@ def dans_lobby(numero_lobby: int, pseudos: 'list[str]'):
     
     if window.menu == 'attente_dans_lobby':
         send(('SERVER', "action", 'quitter_lobby'))
-
+        
+def debut_prises(list_pseudo: 'list[str]'):
+    window.tab_tour_de_jeu.joueurs = list_pseudo
+    window.tab_tour_de_jeu.joueurs[window.tab_tour_de_jeu.index(username)] = "Vous"
 
 def recevoir_jeu(main):
     correspondance_carte = {"coeur": 400, "pique": 300, "carreau": 200, "trefle": 100, "atout": 0}
@@ -182,7 +183,6 @@ def fin_du_pli():
 def nouveau_joueur_dans_lobby(pseudo):
     print(f"[LOBBY] le joueur {pseudo} a rejoint la partie")
     window.tab_waiting_in_lobby.update(pseudo)
-    window.tab_tour_de_jeu.joueurs.append(pseudo)
 
 def username_est_valide(username):
     for charactere in username:
@@ -202,6 +202,7 @@ def choisir_pseudo():
     return choix[0]
 
 def connect_to_server():
+    global username
     username = choisir_pseudo()
     client.connect(ADDR)
     send(username)
