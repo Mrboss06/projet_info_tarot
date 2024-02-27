@@ -84,7 +84,6 @@ def dans_lobby(numero_lobby: int, pseudos: 'list[str]'):
     choix = [-1]
     window.tab_waiting_in_lobby.init_attente(numero_lobby, choix, *pseudos)
     
-    
     while window.menu == 'attente_dans_lobby' and choix[0] == -1: pass
     
     if window.menu == 'attente_dans_lobby':
@@ -136,7 +135,7 @@ def faire_son_chien(chien):
     correspondance_carte = {"coeur": 400, "pique": 300, "carreau": 200, "trefle": 100, "atout": 0}
     main_joueur.main.sort(key=lambda x: correspondance_carte[x[0]]+x[1])
     
-    send(('LOBBY', 'action', 'jeux', chien_choisi))
+    send(('LOBBY', 'action', 'recevoir_chien_choisi', chien_choisi))
 
 def carte_jouee(username, carte_en_jeu):
     window.tab_tour_de_jeu.carte_jouee_par(username, carte_en_jeu)

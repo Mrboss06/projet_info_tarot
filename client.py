@@ -103,7 +103,7 @@ def faire_son_chien(chien):
         if a!='0' and a!='1':
             print('ce caractère n est pas valide')    
     if a=='1':
-        send(('LOBBY', 'action', 'jeux', chien_joueur))
+        send(('LOBBY', 'action', 'recevoir_chien_choisi', chien_joueur))
     elif a=='0':
         faire_son_chien(chien_joueur)   
 

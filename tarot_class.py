@@ -33,12 +33,22 @@ class PartieTarot:
         return joueurs
     
     def obtenir_joueur_par_nom(self, pseudo: str) -> 'tuple[socket.socket, str, str, joueur.Joueur] | bool':
+        """
+        Retourne le tuple representant un joueur de la liste 'self.joueurs' dont le pseudo est 'pseudo', ou False si aucun joueur n'a ce pseudo
+        """
         for j in self.joueurs:
             if j[2] == pseudo:
                 return j
         return False
     
     def run(self):
+        """
+        La boucle du debut de la partie
+        Au début, ça gère quel joueur sont là, ou partent
+        Après ça distribue les cartes
+        Après ça demande à chaque joueur les prises
+        Après ça lance la partie avec la fontion 'lancer_la_partie'
+        """
         while len(self.joueurs) != 4:
             if self.nouveaux_joueurs != []:
                 for nv_joueur in self.nouveaux_joueurs:
@@ -55,25 +65,34 @@ class PartieTarot:
                 self.anciens_joueurs.clear()
         for i in range(4):
             points.append([self.joueurs[i][2], 0])     
-        self.send_msg_to_all("message", 'Tous les joueurs sont connectes, la partie commence')
+        self.send_msg_to_all("action", 'debut_prises', self.obtenir_noms_joueur())
         self.a_commence = True
         self.faire_le_choix_des_prises(self.distribuer())
         self.lancer_la_partie()
         while 1: pass
     
     def send_msg_to_all(self, type, *msg):
+        """
+        Envoie un message à tous les clients, normalement une 'action', avec potentielement des arguments pour les clients
+        """
         for connection in self.joueurs:
             msg_send = pickle.dumps(('LOBBY', type, *msg))
             connection[0].send(msg_send)
         time.sleep(0.1)
     
     def send_msg(self, conn, type, *msg):
+        """
+        Envoie une message à un client spécifique 'conn', normalement une 'action', avec potentielement des arguments pour les clients
+        """
         msg_send = pickle.dumps(('LOBBY', type, *msg))
         conn.send(msg_send)
         time.sleep(0.1)
         
 
     def distribuer(self):
+        """
+        distribue les cartes entre les différents joueurs, et envoie son jeu à chaque joueur
+        """
         a=0
         jeu=[['coeur', 1, 0.5], ['coeur', 2, 0.5], ['coeur', 3, 0.5], ['coeur', 4, 0.5], ['coeur', 5, 0.5], ['coeur', 6, 0.5], ['coeur', 7, 0.5], ['coeur', 8, 0.5], ['coeur', 9, 0.5], ['coeur', 10, 0.5], ['coeur', 11, 1.5], ['coeur', 12, 2.5], ['coeur', 13, 3.5], ['coeur', 14, 4.5], ['pique', 1, 0.5], ['pique', 2, 0.5], ['pique', 3, 0.5], ['pique', 4, 0.5], ['pique', 5, 0.5], ['pique', 6, 0.5], ['pique', 7, 0.5], ['pique', 8, 0.5], ['pique', 9, 0.5], ['pique', 10, 0.5], ['pique', 11, 1.5], ['pique', 12, 2.5], ['pique', 13, 3.5], ['pique', 14, 4.5], ['carreau', 1, 0.5], ['carreau', 2, 0.5], ['carreau', 3, 0.5], ['carreau', 4, 0.5], ['carreau', 5, 0.5], ['carreau', 6, 0.5], ['carreau', 7, 0.5], ['carreau', 8, 0.5], ['carreau', 9, 0.5], ['carreau', 10, 0.5], ['carreau', 11, 1.5], ['carreau', 12, 2.5], ['carreau', 13, 3.5], ['carreau', 14, 4.5], ['trefle', 1, 0.5], ['trefle', 2, 0.5], ['trefle', 3, 0.5], ['trefle', 4, 0.5], ['trefle', 5, 0.5], ['trefle', 6, 0.5], ['trefle', 7, 0.5], ['trefle', 8, 0.5], ['trefle', 9, 0.5], ['trefle', 10, 0.5], ['trefle', 11, 1.5], ['trefle', 12, 2.5], ['trefle', 13, 3.5], ['trefle', 14, 4.5], ['atout', 1, 4.5], ['atout', 2, 0.5], ['atout', 3, 0.5], ['atout', 4, 0.5], ['atout', 5, 0.5], ['atout', 6, 0.5], ['atout', 7, 0.5], ['atout', 8, 0.5], ['atout', 9, 0.5], ['atout', 10, 0.5], ['atout', 11, 0.5], ['atout', 12, 0.5], ['atout', 13, 0.5], ['atout', 14, 0.5], ['atout', 15, 0.5], ['atout', 16, 0.5], ['atout', 17, 0.5], ['atout', 18, 0.5], ['atout', 19, 0.5], ['atout', 20, 0.5], ['atout', 21, 4.5], ['atout', 0, 4.5]]
         for carte in range(len(jeu)):
@@ -94,6 +113,9 @@ class PartieTarot:
         #self.send_msg_to_all("action", "verifier_reception_jeu")
 
     def faire_le_choix_des_prises(self, jeu):
+        """
+        Ca s'explique tout seul non ?
+        """
         nb_prise_actuel = 0
         print(f"chien:{jeu}")
         for i in range(4):
@@ -109,13 +131,16 @@ class PartieTarot:
                 while self.jeu!=0: pass 
                 print (f'chien_joueur: {self.joueurs[i][3].plis}')
     
-    def jeux(self, username, plis):
+    def recevoir_chien_choisi(self, username, chien_preneur):
         for i in range(4):
             if self.joueurs[i][3].prises!=0:
-                self.joueurs[i][3].plis.append([[plis[0], 0], [plis[1], 0], [plis[2], 0], [plis[3], 0], [plis[4], 0], [plis[5], 0]])
+                self.joueurs[i][3].plis.append([[chien_preneur[0], 0], [chien_preneur[1], 0], [chien_preneur[2], 0], [chien_preneur[3], 0], [chien_preneur[4], 0], [chien_preneur[5], 0]])
         self.jeu=0
 
     def recevoir_prise(self, username, prise):
+        """
+        Une fonction appelée par un client, elle indique qu'elle prise ce client a choisi, et renvoie l'information à tous les clients
+        """
         #self.send_msg_to_all("message", f"{username} {'fait une '+('petite', 'garde', 'garde-sans', 'garde-contre')[prise-1] if prise != 0 else 'passe'}!")
         self.send_msg_to_all('action', 'prise_par_qqn', username, prise)
         self.prises.append(prise)
