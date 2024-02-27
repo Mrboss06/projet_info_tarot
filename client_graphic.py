@@ -89,7 +89,7 @@ def dans_lobby(numero_lobby: int, pseudos: 'list[str]'):
         
 def debut_prises(list_pseudo: 'list[str]'):
     window.tab_tour_de_jeu.joueurs = list_pseudo
-    window.tab_tour_de_jeu.joueurs[window.tab_tour_de_jeu.index(username)] = "Vous"
+    window.tab_tour_de_jeu.joueurs[window.tab_tour_de_jeu.joueurs.index(username)] = "Vous"
 
 def recevoir_jeu(main):
     correspondance_carte = {"coeur": 400, "pique": 300, "carreau": 200, "trefle": 100, "atout": 0}

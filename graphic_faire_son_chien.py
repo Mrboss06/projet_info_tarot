@@ -8,6 +8,7 @@ class FaireChien:
     
     def __init__(self, screen: pygame.Surface, cardsImg) -> None:
         self.screen = screen
+        self.backgroundImg = pygame.image.load("assets/backgrounds/bg_partie.png")
         self.cardsImg = cardsImg
         self.cards_correspondance = {"coeur": "C", "pique": "P", "carreau": "K", "trefle": "T", "atout": "A"}
         self.selected = []
@@ -53,6 +54,8 @@ class FaireChien:
         return rects
     
     def update(self, events, mouse_pos: 'tuple[int, int]'):
+        
+        self.screen.blit(self.backgroundImg, (0, 0))
         
         mouse_clicked = False
         for ev in events:

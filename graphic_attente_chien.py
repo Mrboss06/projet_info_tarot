@@ -8,6 +8,7 @@ class AttenteChien:
     
     def __init__(self, screen: pygame.Surface) -> None:
         self.screen = screen
+        self.backgroundImg = pygame.image.load("assets/backgrounds/bg_partie.png")
     
     
     def init_attente(self, pseudo, prise):
@@ -15,6 +16,8 @@ class AttenteChien:
         self.prise = prise
     
     def update(self):
+        
+        self.screen.blit(self.backgroundImg, (0, 0))
         
         txt = FONT_TEXT.render(f"{self.preneur} fait une {['petite', 'garde', 'garde-sans', 'garde-contre'][self.prise-1]}", False, (255, 255, 255))
         self.screen.blit(txt, (MID_X-txt.get_size()[0]//2, 100))
