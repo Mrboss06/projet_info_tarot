@@ -123,13 +123,16 @@ class PartieTarot:
             while len(self.prises) == nb_prise_actuel:
                 pass
             nb_prise_actuel = len(self.prises)
-        for i in range(4):
-            if max(self.prises)==self.prises[i]:
-                self.send_msg_to_all("action", "prise_jouee", self.joueurs[i][2], self.prises[i])
-                self.joueurs[i][3].prises=self.prises[i]
-                self.send_msg(self.joueurs[i][0], 'action', 'faire_son_chien', jeu) 
-                while self.jeu!=0: pass 
-                print (f'chien_joueur: {self.joueurs[i][3].plis}')
+        if max(self.prises)==1:
+            self.farie_le_choix_des_prises(self.distribuer())
+        else:
+            for i in range(4):
+                if max(self.prises)==self.prises[i]:
+                    self.send_msg_to_all("action", "prise_jouee", self.joueurs[i][2], self.prises[i])
+                    self.joueurs[i][3].prises=self.prises[i]
+                    self.send_msg(self.joueurs[i][0], 'action', 'faire_son_chien', jeu) 
+                    while self.jeu!=0: pass 
+                    print (f'chien_joueur: {self.joueurs[i][3].plis}')
     
     def recevoir_chien_choisi(self, username, chien_preneur):
         for i in range(4):
