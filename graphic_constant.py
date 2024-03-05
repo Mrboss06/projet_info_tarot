@@ -21,6 +21,7 @@ FONT_60 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 60)
 FONT_50 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 50)
 FONT_40 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 40)
 FONT_30 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 30)
+FONT_25 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 25)
 FONT_20 = pygame.font.Font('assets/fonts/Roboto-Regular.ttf', 20)
 
 SENSIBLITE_SOURIS = 30

@@ -1,13 +1,11 @@
 import pygame
 import sys
-from graphic_constant import CARD_SIZE, MID_X, MID_Y, SPACE_BETWEEN, CARD_Y, SELECTED_CARD_Y
-
-FONT_ANNONCE = pygame.font.SysFont('Roboto', 25)
+from graphic_constant import CARD_SIZE, MID_X, MID_Y, SPACE_BETWEEN, CARD_Y, SELECTED_CARD_Y, FONT_20, FONT_25
 
 class ChoixAnnonce:
     def __init__(self, screen: pygame.Surface, cards: dict) -> None:
         self.screen = screen
-        self.font = pygame.font.SysFont("Roboto", 20)
+        self.backgroundImg = pygame.image.load("assets/backgrounds/bg_partie.png")
         self.cardsImg = cards
         self.cards_correspondance = {"coeur": "C", "pique": "P", "carreau": "K", "trefle": "T", "atout": "A"}
         self.selected = -1
@@ -49,15 +47,17 @@ class ChoixAnnonce:
             else:
                 color = (255,0, 0)
             pygame.draw.rect(self.screen, color, rect_annonces[i], border_radius=5)
-            font_surface = FONT_ANNONCE.render(self.annonces_possibles[i], False, (0, 0, 0))
+            font_surface = FONT_25.render(self.annonces_possibles[i], False, (0, 0, 0))
             self.screen.blit(font_surface, (MID_X-font_surface.get_size()[0]//2, y+7+39*i))
     
     def dessiner_annonce(self):
         for i in range(len(self.annonces)):
-            txt = FONT_ANNONCE.render(f"{self.annonces[i][0]} {('fait une ' + ['petite', 'garde', 'garde-sans', 'garde-contre'][self.annonces[i][1]-1] if self.annonces[i][1] != 0 else 'passe')}", False, (255, 255, 255))
+            txt = FONT_25.render(f"{self.annonces[i][0]} {('fait une ' + ['petite', 'garde', 'garde-sans', 'garde-contre'][self.annonces[i][1]-1] if self.annonces[i][1] != 0 else 'passe')}", False, (255, 255, 255))
             self.screen.blit(txt, (20, 20+35*i))
     
     def update(self, events, mouse_pos: 'tuple[int, int]', main: 'list[tuple[str, int, int]]'):
+        
+        self.screen.blit(self.backgroundImg, (0, 0))
         
         mouse_clicked = False
         for ev in events:

@@ -35,7 +35,7 @@ class Animation:
 class TourDeJeu:
     def __init__(self, screen: pygame.Surface, cards: dict) -> None:
         self.screen = screen
-        self.font = pygame.font.SysFont("Roboto", 20)
+        self.backgroundImg = pygame.image.load("assets/backgrounds/bg_partie.png")
         self.cardsImg = cards
         self.cards_correspondance = {"coeur": "C", "pique": "P", "carreau": "K", "trefle": "T", "atout": "A"}
         self.selected = -1
@@ -149,6 +149,8 @@ class TourDeJeu:
         
     
     def update(self, events, mouse_pos: 'tuple[int, int]', main: 'list[tuple[str, int, int]]'):
+        
+        self.screen.blit(self.backgroundImg, (0, 0))
         
         mouse_clicked = False
         for ev in events:
