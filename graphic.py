@@ -7,6 +7,7 @@ import graphic_choix_annonce
 import graphic_tour_de_jeu
 import graphic_faire_son_chien
 import graphic_attente_chien
+import threading
 from joueur import Joueur
 from graphic_constant import SCREEN_HEIGHT, SCREEN_WIDTH, CARD_SIZE
 
@@ -50,6 +51,7 @@ class Window:
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
+                    return
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_clicked = True
             
@@ -77,5 +79,3 @@ class Window:
             
             
             pygame.display.update()
-
-        pygame.quit()

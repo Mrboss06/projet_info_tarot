@@ -24,6 +24,7 @@ class PartieTarot:
         self.a_commence = False
         self.prises = []
         self.jeu=1
+        self.STOP_EVENT = threading.Event()
     
     def obtenir_noms_joueur(self) -> 'list[str]':
         """
@@ -49,7 +50,7 @@ class PartieTarot:
         Après ça demande à chaque joueur les prises
         Après ça lance la partie avec la fontion 'lancer_la_partie'
         """
-        while len(self.joueurs) != 4:
+        while len(self.joueurs) != 4 and not self.STOP_EVENT.is_set():
             if self.nouveaux_joueurs != []:
                 for nv_joueur in self.nouveaux_joueurs:
                     self.send_msg_to_all("action", "nouveau_joueur_dans_lobby", nv_joueur[2])
@@ -69,24 +70,26 @@ class PartieTarot:
         self.a_commence = True
         self.faire_le_choix_des_prises(self.distribuer())
         self.lancer_la_partie()
-        while 1: pass
+        while not self.STOP_EVENT.is_set(): pass
     
     def send_msg_to_all(self, type, *msg):
         """
         Envoie un message à tous les clients, normalement une 'action', avec potentielement des arguments pour les clients
         """
-        for connection in self.joueurs:
-            msg_send = pickle.dumps(('LOBBY', type, *msg))
-            connection[0].send(msg_send)
-        time.sleep(0.1)
+        if not self.STOP_EVENT.is_set():
+            for connection in self.joueurs:
+                msg_send = pickle.dumps(('LOBBY', type, *msg))
+                connection[0].send(msg_send)
+            time.sleep(0.1)
     
     def send_msg(self, conn, type, *msg):
         """
         Envoie une message à un client spécifique 'conn', normalement une 'action', avec potentielement des arguments pour les clients
         """
-        msg_send = pickle.dumps(('LOBBY', type, *msg))
-        conn.send(msg_send)
-        time.sleep(0.1)
+        if not self.STOP_EVENT.is_set():
+            msg_send = pickle.dumps(('LOBBY', type, *msg))
+            conn.send(msg_send)
+            time.sleep(0.1)
         
 
     def distribuer(self):
@@ -120,7 +123,7 @@ class PartieTarot:
         print(f"chien:{jeu}")
         for i in range(4):
             self.send_msg(self.joueurs[i][0], 'action', 'choisir_prise', self.prises)
-            while len(self.prises) == nb_prise_actuel:
+            while len(self.prises) == nb_prise_actuel and not self.STOP_EVENT.is_set():
                 pass
             nb_prise_actuel = len(self.prises)
         if max(self.prises)==1:
@@ -131,7 +134,7 @@ class PartieTarot:
                     self.send_msg_to_all("action", "prise_jouee", self.joueurs[i][2], self.prises[i])
                     self.joueurs[i][3].prises=self.prises[i]
                     self.send_msg(self.joueurs[i][0], 'action', 'faire_son_chien', jeu) 
-                    while self.jeu!=0: pass 
+                    while self.jeu!=0 and not self.STOP_EVENT.is_set(): pass 
                     print (f'chien_joueur: {self.joueurs[i][3].plis}')
     
     def recevoir_chien_choisi(self, username, chien_preneur):

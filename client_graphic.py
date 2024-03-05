@@ -3,29 +3,34 @@ import threading
 import pickle
 import time
 
+import pygame
+
 import joueur
 import graphic
 
 HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '172.21.6.50'
+DISCONNECT_MESSAGE = ("SERVER", 'action', 'DISCONNECT')
+SERVER = '127.0.0.0'
 ADDR = (SERVER, PORT)
-
+STOP_EVENT = threading.Event()
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 main_joueur = joueur.Joueur()
 window = graphic.Window(main_joueur)
 username = ""
 
+threads = []
+
 def send(msg):
-    message = pickle.dumps(msg)
-    client.send(message)
+    if not STOP_EVENT.is_set():
+        message = pickle.dumps(msg)
+        client.send(message)
 
 
 def handle_server():
-    while True:
+    while not STOP_EVENT.is_set():
         msg = pickle.loads(client.recv(2048))
         if msg == DISCONNECT_MESSAGE:
             print('[CLIENT] disconnecting...')
@@ -35,10 +40,13 @@ def handle_server():
                 if msg[1] == 'message':
                     print(msg[2])
                 elif msg[1] == 'action':
-                    threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])).start()
+                    threads.append(threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])))
+                    threads[-1].start()
             if msg[0] == 'LOBBY':
                 if msg[1] == "action":
-                    threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])).start()
+                    
+                    threads.append(threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])))
+                    threads[-1].start()
                 elif msg[1] == "message":
                     print(f"[LOBBY] {msg[2]}")
         else:
@@ -56,7 +64,7 @@ def choisir_lobby(lst_lobbies):
     window.tab_select_lobby.init_lobby(possible_lobbies, choix)
     window.menu = 'choisir_lobby'
     timer = time.monotonic()
-    while choix[0]==-1:
+    while choix[0]==-1 and not STOP_EVENT.is_set():
         if time.monotonic() - timer > 5:
             send(('SERVER', 'action', 'obtenir_lst_lobby'))
             timer = time.monotonic()
@@ -64,7 +72,7 @@ def choisir_lobby(lst_lobbies):
     lobby = choix[0]
     if lobby != '+':
         lobby = int(lobby)
-    client.send(pickle.dumps(("SERVER", "action", "choisir_lobby", lobby)))
+    send(("SERVER", "action", "choisir_lobby", lobby))
 
 def mettre_a_jour_list_lobby(list_lobby: list):
     possible_lobbies = []
@@ -80,7 +88,7 @@ def dans_lobby(numero_lobby: int, pseudos: 'list[str]'):
     choix = [-1]
     window.tab_waiting_in_lobby.init_attente(numero_lobby, choix, *pseudos)
     
-    while window.menu == 'attente_dans_lobby' and choix[0] == -1: pass
+    while window.menu == 'attente_dans_lobby' and choix[0] == -1 and not STOP_EVENT.is_set(): pass
     
     if window.menu == 'attente_dans_lobby':
         send(('SERVER', "action", 'quitter_lobby'))
@@ -113,7 +121,7 @@ def choisir_prise(prises):
     lst_annonce = [""]
     window.tab_choix_annonce.init_annonce(prises_possibles, lst_annonce)
     
-    while lst_annonce[0] == "": pass
+    while lst_annonce[0] == "" and not STOP_EVENT.is_set(): pass
     
     prise = ["Je passe", "Petite", "Garde", "Garde-sans", "Garde-contre"].index(lst_annonce[0])
     
@@ -124,7 +132,7 @@ def faire_son_chien(chien):
     window.tab_choix_chien.init(main_joueur.main, chien, chien_carte_index)
     window.menu = 'faire_son_chien'
     
-    while chien_carte_index == []: pass
+    while chien_carte_index == [] and not STOP_EVENT.is_set(): pass
     
     chien_choisi = [main_joueur.main[index] for index in chien_carte_index]
     
@@ -157,7 +165,7 @@ def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
     carte_jouee_lst = [0, 0, 0]
     
     window.tab_tour_de_jeu.carte_jouee = carte_jouee_lst
-    while carte_jouee_lst[0] == 0: pass
+    while carte_jouee_lst[0] == 0 and not STOP_EVENT.is_set(): pass
     window.tab_tour_de_jeu.jouer_une_carte = False
     carte_jouee_index = carte_jouee_lst[1]
     carte_jouee = carte_jouee_lst[0]
@@ -194,7 +202,7 @@ def choisir_pseudo():
     window.tab_choose_username.init_choix_pseudo(choix)
     window.menu = 'username'
     print(window.menu)
-    while choix==[]: pass
+    while choix==[] and not STOP_EVENT.is_set(): pass
     window.menu = ''
     print(f"[CLIENT] ton pseudo est {choix[0]}")
     return choix[0]
@@ -214,7 +222,10 @@ start_thread.start()
 
 window.run()
 
+STOP_EVENT.set()
+for thread in threads:
+    thread.join()
 
+client.send(pickle.dumps(DISCONNECT_MESSAGE))
 
-
-
+pygame.quit()
