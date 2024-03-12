@@ -34,6 +34,7 @@ def handle_client(conn: socket.socket, addr, username):
     connected = True
     while connected:
         msg = pickle.loads(conn.recv(2048))
+        print(f"[{username}] {msg}")
         if msg == DISCONNECT_MESSAGE:
             connected = False
             print(f"[SERVER] {username} DISCONNECT")
@@ -54,23 +55,27 @@ def handle_client(conn: socket.socket, addr, username):
                         dans_lobby = True
                     elif msg[2] == 'quitter_lobby':
                         print("[SERVER] {username} QUITTE LE LOBBY {numero_lobby}")
-                        lobbies[obtenir_lobby_par_numero(numero)][0].anciens_joueurs.append(username)
+                        lobbies[obtenir_lobby_par_numero(numero)][0].anciens_joueurs.append((username, 0))
                         msg_send = pickle.dumps(('SERVER', 'action', 'choisir_lobby', get_liste_lobby()))
                         conn.send(msg_send)
                         dans_lobby = False
                     elif msg[2] == "obtenir_lst_lobby":
                         msg_send = pickle.dumps(('SERVER', 'action', 'mettre_a_jour_list_lobby', get_liste_lobby()))
                         conn.send(msg_send)
-                        
+                    elif msg[2] == "deconnection_forcee":
+                        lst_lobbies = get_liste_lobby()
+                        msg_send = pickle.dumps(('SERVER', 'action', 'choisir_lobby', lst_lobbies))
+                        conn.send(msg_send)
             if msg[0] == 'LOBBY':
                 if msg[1] == 'action':
-                    threading.Thread(target=eval(f"lobbies[{obtenir_lobby_par_numero(numero_lobby)}][0].{msg[2]}"), args=[username, *msg[3:]]).start()
+                    thread = threading.Thread(target=eval(f"lobbies[{obtenir_lobby_par_numero(numero_lobby)}][0].{msg[2]}"), args=[username, *msg[3:]])
+                    lobbies[obtenir_lobby_par_numero(numero_lobby)][0].threads.append(thread)
+                    thread.start()
                 
-    time.sleep(2)
     if dans_lobby:
         lobby = lobbies[obtenir_lobby_par_numero(numero_lobby)] 
         if not lobby[0].a_commence:
-            lobby[0].anciens_joueurs.append(username)
+            lobby[0].anciens_joueurs.append((username,1))
         else:
             destroy_lobby(lobby)
     
@@ -125,9 +130,11 @@ def obtenir_lobby_par_numero(numero: int) -> 'int | bool':
     return False
 
 def destroy_lobby(lobby):
-    lobby[0].STOP_EVENT.set()
+    lobby[0].destroy()
     lobby[1].join()
     lobbies.remove(lobby)
+    print(f"[LOBBY] LOBBY {lobby[0].numero_lobby} SUPPRIME")
+    del lobby
 
 def start():
     server.listen()

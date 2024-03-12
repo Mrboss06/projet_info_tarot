@@ -11,12 +11,14 @@ DISCONNECT_MESSAGE = '!DISCONNECT'
 
 SERVER = '127.0.0.0'
 ADDR = (SERVER, PORT)
-
+DECONNECTION_FORCEE_EVENT = threading.Event()
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 main_joueur = joueur.Joueur()
+
+lobby_threads: 'list[threading.Thread]' = []
 
 def send(msg):
     message = pickle.dumps(msg)
@@ -37,7 +39,10 @@ def handle_server():
                     threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])).start()
             if msg[0] == 'LOBBY':
                 if msg[1] == "action":
-                    threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])).start()
+                    thread = threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else []))
+                    if msg[2] != 'deconnection_forcee':
+                        lobby_threads.append(thread)
+                    thread.start()
                 elif msg[1] == "message":
                     print(f"[LOBBY] {msg[2]}")
         else:
@@ -68,17 +73,22 @@ def joueur_quitte_lobby(pseudo):
 def dans_lobby(numero, pseudos):
     print(f'tu rentres dans le lobby {numero} avec les joueurs: {pseudos}')
 
+def deconnection_forcee():
+    DECONNECTION_FORCEE_EVENT.set()
+    for thread in lobby_threads:
+        thread.join()
+    for thread in range(len(lobby_threads)):
+        del lobby_threads[-1]
+    lobby_threads.clear()
+    print(f"[CLIENT] deconnection forcee")
+    send(("SERVER", "action", "deconnection_forcee"))
+
 def debut_prises(list_pseudo):
     pass
 
 def recevoir_jeu(main):
     main_joueur.main=main
     print(f"\nVoici ton jeu:\n{main}\n\n****\n")
-
-
-def verifier_reception_jeu():
-    if main_joueur.main == []:
-        send(("LOBBY", "action", "jeu_pas_recu"))
 
 def prise_par_qqn(username, prise):
     print(f"{username} a fait une '{['Passe', 'Petite', 'Garde', 'Garde-sans', 'Garde-contre'][prise]}'")
@@ -93,19 +103,20 @@ def faire_son_chien(chien):
         print(f"Voici votre main: {jeu}")
         print("Choisissez l'index d'une carte à retirer:")
         carte_a_retirer=int(input())
-        while carte_a_retirer>=len(jeu):
+        while carte_a_retirer>=len(jeu) and not DECONNECTION_FORCEE_EVENT.is_set():
             print('Index trop élevé, réessayez.')
             carte_a_retirer=int(input())
         chien_joueur.append(main_joueur.main[carte_a_retirer])
         jeu.pop(carte_a_retirer)
-    while a!='1' and a!='0':
+    while a!='1' and a!='0' and not DECONNECTION_FORCEE_EVENT.is_set():
         print(f'Voici votre chien: {chien_joueur}')    
         print('Si il vous convient, appuyez sur 1, sinon pour le refaire,appuyez sur 0:')
         a=input()
         if a!='0' and a!='1':
             print('ce caractère n est pas valide')    
     if a=='1':
-        send(('LOBBY', 'action', 'recevoir_chien_choisi', chien_joueur))
+        if not DECONNECTION_FORCEE_EVENT.is_set():
+            send(('LOBBY', 'action', 'recevoir_chien_choisi', chien_joueur))
     elif a=='0':
         faire_son_chien(chien_joueur)   
 
@@ -126,7 +137,8 @@ def choisir_prise(prises):
         prise += plus_petite_annonce_possible - 2
     else:
         prise -= 1
-    send(('LOBBY', 'action', 'recevoir_prise', prise))
+    if not DECONNECTION_FORCEE_EVENT.is_set():
+        send(('LOBBY', 'action', 'recevoir_prise', prise))
 
 def nouveau_joueur_dans_lobby(pseudo):
     print(f"[LOBBY] le joueur {pseudo} a rejoint la partie !")
@@ -145,7 +157,7 @@ def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
     print(f"voici les cartes qui ont déjà été jouées: {cartes_en_jeu}")
     print("indice de la carte à jouer?")
     carte_jouée=int(input())
-    while carte_jouée>=len(main_joueur.main):
+    while carte_jouée>=len(main_joueur.main) and DECONNECTION_FORCEE_EVENT.is_set():
         print('index trop élevé, réessayez')
         carte_jouée=int(input())
     if main_joueur.main[carte_jouée]==['atout', 0, 4.5] and main_joueur.main!=[['atout', 0, 4.5]]:
@@ -158,8 +170,9 @@ def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
             couleur=main_joueur.main[carte_jouée][0]
         if indice_joueur==1 and cartes_en_jeu[0][0][0]=='NULL':
             couleur=main_joueur.main[carte_jouée][0]
-    main_joueur.main.pop(carte_jouée)    
-    send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, cartes_en_jeu, couleur, tour))
+    main_joueur.main.pop(carte_jouée)
+    if not DECONNECTION_FORCEE_EVENT.is_set():
+        send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, cartes_en_jeu, couleur, tour))
 
 def fin_du_pli():
     print('fin du pli')

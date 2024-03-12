@@ -15,6 +15,7 @@ DISCONNECT_MESSAGE = ("SERVER", 'action', 'DISCONNECT')
 SERVER = '127.0.0.0'
 ADDR = (SERVER, PORT)
 STOP_EVENT = threading.Event()
+DECONNECTION_FORCEE_EVENT = threading.Event()
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 main_joueur = joueur.Joueur()
@@ -22,6 +23,7 @@ window = graphic.Window(main_joueur)
 username = ""
 
 threads = []
+lobby_threads = []
 
 def send(msg):
     if not STOP_EVENT.is_set():
@@ -44,8 +46,10 @@ def handle_server():
                     threads[-1].start()
             if msg[0] == 'LOBBY':
                 if msg[1] == "action":
-                    
-                    threads.append(threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else [])))
+                    thread = threading.Thread(target=eval(msg[2]), args=(msg[3:] if len(msg)>3 else []))
+                    threads.append(thread)
+                    if msg[2] != 'deconnection_forcee':
+                        lobby_threads.append(thread)
                     threads[-1].start()
                 elif msg[1] == "message":
                     print(f"[LOBBY] {msg[2]}")
@@ -92,7 +96,18 @@ def dans_lobby(numero_lobby: int, pseudos: 'list[str]'):
     
     if window.menu == 'attente_dans_lobby':
         send(('SERVER', "action", 'quitter_lobby'))
-        
+
+def deconnection_forcee():
+    if not STOP_EVENT.is_set():
+        DECONNECTION_FORCEE_EVENT.set()
+        for thread in lobby_threads:
+            thread.join()
+        for thread in range(len(lobby_threads)):
+            del lobby_threads[-1]
+        lobby_threads.clear()
+        print(f"[CLIENT] deconnection forcee")
+        send(("SERVER", "action", "deconnection_forcee"))
+
 def debut_prises(list_pseudo: 'list[str]'):
     window.tab_tour_de_jeu.joueurs = list_pseudo
     window.tab_tour_de_jeu.joueurs[window.tab_tour_de_jeu.joueurs.index(username)] = "Vous"
@@ -106,10 +121,6 @@ def recevoir_jeu(main):
         if window.tab_tour_de_jeu.joueurs[0] != "Vous":
             window.tab_tour_de_jeu.joueurs.append(window.tab_tour_de_jeu.joueurs.pop(0))
 
-def verifier_reception_jeu():
-    if main_joueur.main == []:
-        send(("LOBBY", "action", "jeu_pas_recu"))
-
 def prise_par_qqn(username, prise):
     window.tab_choix_annonce.annonces.append((username, prise))
 
@@ -121,18 +132,19 @@ def choisir_prise(prises):
     lst_annonce = [""]
     window.tab_choix_annonce.init_annonce(prises_possibles, lst_annonce)
     
-    while lst_annonce[0] == "" and not STOP_EVENT.is_set(): pass
+    while lst_annonce[0] == "" and not STOP_EVENT.is_set() and not DECONNECTION_FORCEE_EVENT.is_set(): pass
     
     prise = ["Je passe", "Petite", "Garde", "Garde-sans", "Garde-contre"].index(lst_annonce[0])
     
-    send(('LOBBY', 'action', 'recevoir_prise', prise))
+    if not DECONNECTION_FORCEE_EVENT.is_set():
+        send(('LOBBY', 'action', 'recevoir_prise', prise))
 
 def faire_son_chien(chien):
     chien_carte_index = []
     window.tab_choix_chien.init(main_joueur.main, chien, chien_carte_index)
     window.menu = 'faire_son_chien'
     
-    while chien_carte_index == [] and not STOP_EVENT.is_set(): pass
+    while chien_carte_index == [] and not STOP_EVENT.is_set() and not DECONNECTION_FORCEE_EVENT.is_set(): pass
     
     chien_choisi = [main_joueur.main[index] for index in chien_carte_index]
     
@@ -142,7 +154,8 @@ def faire_son_chien(chien):
     correspondance_carte = {"coeur": 400, "pique": 300, "carreau": 200, "trefle": 100, "atout": 0}
     main_joueur.main.sort(key=lambda x: correspondance_carte[x[0]]+x[1])
     
-    send(('LOBBY', 'action', 'recevoir_chien_choisi', chien_choisi))
+    if not DECONNECTION_FORCEE_EVENT.is_set():
+        send(('LOBBY', 'action', 'recevoir_chien_choisi', chien_choisi))
 
 def carte_jouee(username, carte_en_jeu):
     window.tab_tour_de_jeu.carte_jouee_par(username, carte_en_jeu)
@@ -165,7 +178,7 @@ def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
     carte_jouee_lst = [0, 0, 0]
     
     window.tab_tour_de_jeu.carte_jouee = carte_jouee_lst
-    while carte_jouee_lst[0] == 0 and not STOP_EVENT.is_set(): pass
+    while carte_jouee_lst[0] == 0 and not STOP_EVENT.is_set() and not DECONNECTION_FORCEE_EVENT.is_set(): pass
     window.tab_tour_de_jeu.jouer_une_carte = False
     carte_jouee_index = carte_jouee_lst[1]
     carte_jouee = carte_jouee_lst[0]
@@ -181,7 +194,8 @@ def jouer_une_carte(cartes_en_jeu, indice_joueur, couleur, tour):
             couleur=main[carte_jouee_index][0]
         if indice_joueur==1 and cartes_en_jeu[0][0][0]=='NULL':
             couleur=main[carte_jouee_index][0]
-    send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, cartes_en_jeu, couleur, tour))
+    if not DECONNECTION_FORCEE_EVENT.is_set():
+        send(('LOBBY', 'action', 'tour_de_jeu_classique', indice_joueur, cartes_en_jeu, couleur, tour))
 
 def fin_du_pli():
     window.tab_tour_de_jeu.carte_en_jeu.clear()
@@ -204,17 +218,19 @@ def choisir_pseudo():
     print(window.menu)
     while choix==[] and not STOP_EVENT.is_set(): pass
     window.menu = ''
-    print(f"[CLIENT] ton pseudo est {choix[0]}")
-    return choix[0]
+    if not STOP_EVENT.is_set():
+        print(f"[CLIENT] ton pseudo est {choix[0]}")
+        return choix[0]
 
 def connect_to_server():
     global username
     username = choisir_pseudo()
-    client.connect(ADDR)
-    send(username)
+    if not STOP_EVENT.is_set():
+        client.connect(ADDR)
+        send(username)
 
-    server_thread = threading.Thread(target=handle_server)
-    server_thread.start()
+        server_thread = threading.Thread(target=handle_server)
+        server_thread.start()
     
 
 start_thread = threading.Thread(target=connect_to_server)
@@ -222,10 +238,13 @@ start_thread.start()
 
 window.run()
 
+try:
+    client.send(pickle.dumps(DISCONNECT_MESSAGE))
+except: pass
+
 STOP_EVENT.set()
 for thread in threads:
     thread.join()
 
-client.send(pickle.dumps(DISCONNECT_MESSAGE))
 
 pygame.quit()

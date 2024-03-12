@@ -25,6 +25,7 @@ class PartieTarot:
         self.prises = []
         self.jeu=1
         self.STOP_EVENT = threading.Event()
+        self.threads = []
     
     def obtenir_noms_joueur(self) -> 'list[str]':
         """
@@ -45,7 +46,7 @@ class PartieTarot:
     def run(self):
         """
         La boucle du debut de la partie
-        Au début, ça gère quel joueur sont là, ou partent
+        Au début, ça gère quels joueurs sont là, ou partent
         Après ça distribue les cartes
         Après ça demande à chaque joueur les prises
         Après ça lance la partie avec la fontion 'lancer_la_partie'
@@ -59,10 +60,11 @@ class PartieTarot:
                 self.nouveaux_joueurs.clear()
             if self.anciens_joueurs != []:
                 for ancien_joueur in self.anciens_joueurs:
-                    print(f"[LOBBY {self.numero_lobby}] le joueur {ancien_joueur} part")
-                    self.send_msg(self.obtenir_joueur_par_nom(ancien_joueur)[0], "message", f"Tu as quitté le lobby {self.numero_lobby}")
-                    self.joueurs.remove(self.obtenir_joueur_par_nom(ancien_joueur))
-                    self.send_msg_to_all("action", "joueur_quitte_lobby", ancien_joueur)
+                    print(f"[LOBBY {self.numero_lobby}] le joueur {ancien_joueur[0]} part")
+                    if ancien_joueur[1] == 0:
+                        self.send_msg(self.obtenir_joueur_par_nom(ancien_joueur[0])[0], "message", f"Tu as quitté le lobby {self.numero_lobby}")
+                    self.joueurs.remove(self.obtenir_joueur_par_nom(ancien_joueur[0]))
+                    self.send_msg_to_all("action", "joueur_quitte_lobby", ancien_joueur[0])
                 self.anciens_joueurs.clear()
         for i in range(4):
             points.append([self.joueurs[i][2], 0])     
@@ -71,7 +73,13 @@ class PartieTarot:
         self.faire_le_choix_des_prises(self.distribuer())
         self.lancer_la_partie()
         while not self.STOP_EVENT.is_set(): pass
-    
+
+    def destroy(self):
+        self.send_msg_to_all("action", "deconnection_forcee")
+        self.STOP_EVENT.set()
+        for thread in self.threads:
+            thread.join()
+
     def send_msg_to_all(self, type, *msg):
         """
         Envoie un message à tous les clients, normalement une 'action', avec potentielement des arguments pour les clients
@@ -111,9 +119,6 @@ class PartieTarot:
         for i in range(4):
             self.send_msg(self.joueurs[i][0], 'action', 'recevoir_jeu', self.joueurs[i][3].main)
         return jeu
-                
-            
-        #self.send_msg_to_all("action", "verifier_reception_jeu")
 
     def faire_le_choix_des_prises(self, jeu):
         """
@@ -126,16 +131,17 @@ class PartieTarot:
             while len(self.prises) == nb_prise_actuel and not self.STOP_EVENT.is_set():
                 pass
             nb_prise_actuel = len(self.prises)
-        if max(self.prises)==1:
-            self.farie_le_choix_des_prises(self.distribuer())
-        else:
-            for i in range(4):
-                if max(self.prises)==self.prises[i]:
-                    self.send_msg_to_all("action", "prise_jouee", self.joueurs[i][2], self.prises[i])
-                    self.joueurs[i][3].prises=self.prises[i]
-                    self.send_msg(self.joueurs[i][0], 'action', 'faire_son_chien', jeu) 
-                    while self.jeu!=0 and not self.STOP_EVENT.is_set(): pass 
-                    print (f'chien_joueur: {self.joueurs[i][3].plis}')
+        if not self.STOP_EVENT.is_set():
+            if max(self.prises)==0:
+                self.faire_le_choix_des_prises(self.distribuer())
+            else:
+                for i in range(4):
+                    if max(self.prises)==self.prises[i]:
+                        self.send_msg_to_all("action", "prise_jouee", self.joueurs[i][2], self.prises[i])
+                        self.joueurs[i][3].prises=self.prises[i]
+                        self.send_msg(self.joueurs[i][0], 'action', 'faire_son_chien', jeu) 
+                        while self.jeu!=0 and not self.STOP_EVENT.is_set(): pass 
+                        print (f'chien_joueur: {self.joueurs[i][3].plis}')
     
     def recevoir_chien_choisi(self, username, chien_preneur):
         for i in range(4):
